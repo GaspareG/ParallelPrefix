@@ -1,23 +1,32 @@
-#!/bin/env python3
+#!/bin/env python2.7
 
-import subprocess
+from subprocess import Popen, PIPE
+import multiprocessing
+import math
 
 for i in range(16, 32):
 
+  print "[" + str(2**i) + "]"
   # SEQ
   file = "prefix1_seq_for"
   k = (2**i)
   t = 1
   input = ("1 " * k + "\n").encode("ascii")
-  p = subprocess.run( ["./bin/" + file, str(k)], input=input, stdout=subprocess.PIPE, stderr=subprocess.PIPE ) # PIPE)
-  print("T", t, "K", k, "E", p.stderr.decode("ascii")[:-1], "["+file+"]" )
+  p = Popen(['./bin/prefix2_horn_omp', str(k)], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+  output, err = p.communicate(b""+input+"")
+  err = err.strip()
+  print "T " + str(t) + " K " + str(k) + " E " + str(err) + " [" + file + "]"
 
   # PAR
   for file in ["prefix2_horn_omp", "prefix3_updownsweep_omp"]:
-    for t in [1, 2, 4, 8]:
+    print
+    for t in range(0, 1+int(math.log(multiprocessing.cpu_count(), 2))):
+      t = (2**t)
       k = (2**i)
       input = ("1 " * k + "\n").encode("ascii")
-      p = subprocess.run( ["./bin/" + file, str(k), str(t)], input=input, stdout=subprocess.PIPE, stderr=subprocess.PIPE ) # PIPE)
-      print("T", t, "K", k, "E", p.stderr.decode("ascii")[:-1], "["+file+"]" )
+      p = Popen(["./bin/" + file, str(k), str(t)], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+      output, err = p.communicate(b""+input+"")
+      err = err.strip()
+      print "T " + str(t) + " K " + str(k) + " E " + str(err) + " [" + file + "]"
 
-  print()
+  print

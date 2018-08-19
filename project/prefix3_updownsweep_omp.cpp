@@ -11,7 +11,7 @@ std::vector< std::vector<int> > upSweep(std::vector<int>& V)
   for(size_t d=1; (1<<(d-1)) <= N; d++)
   {
     Ad.push_back( std::vector<int>( (N/(1<<(d))) ) );
-    #pragma omp parallel for schedule(guided)
+    #pragma omp parallel for
     for(size_t i=0; i < (N/(1<<(d))); i++ )
       Ad[d][i] = Ad[d-1][2*i] + Ad[d-1][2*i+1];
   }
@@ -24,7 +24,7 @@ void downSweep(std::vector<int>& V, std::vector< std::vector<int> >& Ad )
   for(size_t dc = 1; dc <= Ad.size(); dc++)
   {
     size_t d = Ad.size()-dc;
-    #pragma omp parallel for schedule(guided)
+    #pragma omp parallel for
     for(size_t i=1; i < (N/(1<<(d))); i++)
     {
       if( i % 2 != 0 )

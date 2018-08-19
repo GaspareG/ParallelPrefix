@@ -11,7 +11,7 @@ void horn(std::vector<int>& V)
   std::vector<int> Vnew(N);
   for(size_t i=1; (1<<(i-1)) <= N; i++)
   {
-    #pragma omp parallel for schedule(guided)
+    #pragma omp parallel for
     for(size_t k=0; k < N; k++)
     {
       if( k < (1<<(i-1)) )  Vnew[k] = Vold[k];
