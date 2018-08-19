@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <chrono>
 
 int main(int argc, char **argv)
 {
@@ -20,8 +21,15 @@ int main(int argc, char **argv)
   }
 
   // Calc prefix array
+  auto start   = std::chrono::high_resolution_clock::now();
+
   for(int i=1; i<N; i++)
     V[i] += V[i-1];
+
+  auto elapsed = std::chrono::high_resolution_clock::now() - start;
+  auto msec    = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
+
+  std::cerr << msec << std::endl;
 
   // Write output
   for(int i : V)
