@@ -25,7 +25,7 @@ int main(int argc, char **argv)
   // Calc prefix array
   auto start   = std::chrono::high_resolution_clock::now();
 
-  std::partial_sum(V.begin(), V.end(), V.begin());
+  std::inclusive_scan(V.begin(), V.end(), V.begin());
 
   auto elapsed = std::chrono::high_resolution_clock::now() - start;
   auto msec    = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();

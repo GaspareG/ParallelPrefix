@@ -3,44 +3,40 @@
 #include <chrono>
 #include <omp.h>
 
-std::vector< std::vector<int> > upSweep(std::vector<int>& V, int Nthread)
+void upSweep(std::vector<int>& V)
 {
   size_t N = V.size();
-  std::vector< std::vector<int> > Ad;
-  Ad.push_back(V);
-  for(size_t d=1; (1<<(d-1)) <= N; d++)
+  for(size_t d=0; (1<<(d-1)) <= N; d++)
   {
-    Ad.push_back( std::vector<int>( (N/(1<<(d))) ) );
     #pragma omp parallel for
-    for(size_t i=0; i < (N/(1<<(d))); i++ )
-      Ad[d][i] = Ad[d-1][2*i] + Ad[d-1][2*i+1];
+	  for(size_t k=0; k<N; k += (1<<(d+1)))
+      V[k + (1<<(d+1)) - 1] += V[k + (1<<d) - 1];
+
   }
-  return Ad;
 }
 
-void downSweep(std::vector<int>& V, std::vector< std::vector<int> >& Ad, int Nthread)
+
+void downSweep(std::vector<int>& V)
 {
   size_t N = V.size();
 
-  auto lCopy = [&]{ };
-  auto lAdd = [&]{ };
+  V[N-1] = 0;
 
-  for(size_t dc = 1; dc <= Ad.size(); dc++)
+  size_t logn = 0;
+  for(logn=0; (1<<(logn-1)) <= N; logn++);
+
+  for(size_t dc=1; dc <= logn; dc++)
   {
-    size_t d = Ad.size()-dc;
-    size_t limit = (N/(1<<(d)));
-  
-    
+    size_t d = logn-dc;
     #pragma omp parallel for
-    for(size_t i=1; i < limit; i++)
+    for(size_t k=0; k<N; k += (1<<(d+1)) )
     {
-      if( i % 2 != 0 )
-        Ad[d][i] = Ad[d+1][i/2];
-      else
-        Ad[d][i] += Ad[d+1][(i/2)-1];
+      int t = V[k + (1<<d) - 1];
+      V[k + (1<<d)     - 1] = V[k + (1<<(d+1)) - 1];
+      V[k + (1<<(d+1)) - 1] += t;
     }
   }
-  V = Ad[0];
+
 }
 
 int main(int argc, char **argv)
@@ -54,9 +50,12 @@ int main(int argc, char **argv)
   int N = atoi(argv[1]);
   std::vector<int> V(N);
 
-  int Nthread = 1;
   if( argc > 2 )
-    Nthread = atoi(argv[2]);
+  {
+    int Nthread = atoi(argv[2]);
+    omp_set_dynamic(0);
+    omp_set_num_threads(Nthread);
+  }
 
   // Read input
   int tmp;
@@ -66,10 +65,13 @@ int main(int argc, char **argv)
     V[i] = tmp;
   }
 
-  // Calc prefix array
+  //Calc prefix array
   auto start   = std::chrono::high_resolution_clock::now();
-  auto Ad = upSweep(V, Nthread);
-  downSweep(V, Ad, Nthread);
+  V.push_back( V[V.size()-1] );
+
+  upSweep(V);
+  downSweep(V);
+
   auto elapsed = std::chrono::high_resolution_clock::now() - start;
   auto msec    = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
 
