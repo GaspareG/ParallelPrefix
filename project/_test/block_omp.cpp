@@ -20,16 +20,12 @@ void prefixSum(const std::vector<int>& V, std::vector<int>& V2, int NW)
   auto start   = std::chrono::high_resolution_clock::now();
 
   // First phase: parallel block partial_sum
+  #pragma omp parallel for schedule(static)
+  for(int i=0; i<NW; i++)
   {
-    std::vector<std::thread> threads_b;
-    auto block_f = [&V, &V2](std::tuple<int,int> range){
-      int a = std::get<0>(range);
-      int b = std::get<1>(range);
-      std::partial_sum(std::begin(V)+a, std::begin(V)+b, std::begin(V2)+a);
-    };
-
-    for(int i=0; i<NW; i++) threads_b.push_back(std::thread(block_f, ranges[i]));
-    for(auto &t : threads_b) t.join();
+    int a = std::get<0>(ranges[i]);
+    int b = std::get<1>(ranges[i]);
+    std::partial_sum(std::begin(V)+a, std::begin(V)+b, std::begin(V2)+a);
   }
   // end
 
@@ -47,16 +43,11 @@ void prefixSum(const std::vector<int>& V, std::vector<int>& V2, int NW)
   auto phase2 = start2 - start1;
 
   // Third phase: parallel range add
+  for(int i=0; i<NW; i++)
   {
-    std::vector<std::thread> threads_a;
-    auto add_f = [&V2](std::tuple<int,int> range, int add){
-      int a = std::get<0>(range);
-      int b = std::get<1>(range);
-      std::transform(std::begin(V2)+a, std::begin(V2)+b, std::begin(V2)+a, [add](int x){ return x+add; });
-    };
-
-    for(int i=0; i<NW; i++) threads_a.push_back(std::thread(add_f, ranges[i], p_sum[i]));
-    for(auto &t : threads_a) t.join();
+    int a = std::get<0>(ranges[i]);
+    int b = std::get<1>(ranges[i]);
+    std::transform(std::begin(V2)+a, std::begin(V2)+b, std::begin(V2)+a, [p_sum[i]](int x){ return x+add; });
   }
   // end
 
