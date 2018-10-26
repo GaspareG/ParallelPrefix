@@ -16,21 +16,20 @@ void prefixSum(const std::vector<int>& V, std::vector<int>& V2, int NW)
 
   std::vector<std::tuple<int,int>> ranges(NW);
   for(int i=0; i<NW; i++) ranges[i] = std::make_tuple(i*blockSize, std::min(N, (i+1)*blockSize));
+  std::get<1>(ranges[NW-1]) = N;
 
   auto start   = std::chrono::high_resolution_clock::now();
 
   // First phase: parallel block partial_sum
-  {
-    std::vector<std::thread> threads_b;
-    auto block_f = [&V, &V2](std::tuple<int,int> range){
-      int a = std::get<0>(range);
-      int b = std::get<1>(range);
-      std::partial_sum(std::begin(V)+a, std::begin(V)+b, std::begin(V2)+a);
-    };
+  std::vector<std::thread> threads_b;
+  auto block_f = [&V, &V2](std::tuple<int,int> range){
+    int a = std::get<0>(range);
+    int b = std::get<1>(range);
+    std::partial_sum(std::begin(V)+a, std::begin(V)+b, std::begin(V2)+a);
+  };
 
-    for(int i=0; i<NW; i++) threads_b.push_back(std::thread(block_f, ranges[i]));
-    for(auto &t : threads_b) t.join();
-  }
+  for(int i=0; i<NW; i++) threads_b.push_back(std::thread(block_f, ranges[i]));
+  for(auto &t : threads_b) t.join();
   // end
 
   auto start1 = std::chrono::high_resolution_clock::now();
@@ -39,7 +38,7 @@ void prefixSum(const std::vector<int>& V, std::vector<int>& V2, int NW)
   // Second phase: sequential partial_sum on end-ranges
   std::vector<int> p_sum(NW, 0);
   {
-    for(int i=1; i<NW; i++) p_sum[i] = p_sum[i-1] + V2[std::get<1>(ranges[i-1])];
+    for(int i=1; i<NW; i++) p_sum[i] = p_sum[i-1] + V2[std::get<1>(ranges[i-1])-1];
   }
   // end
 
@@ -82,10 +81,17 @@ void prefixSum(const std::vector<int>& V, std::vector<int>& V2, int NW)
 int main()
 {
   std::vector<int> V(1<<30);
+  std::vector<int> V2(1<<30);
 
   std::iota(std::begin(V), std::end(V), 0);
 
-  for(int i=1; i<=NTHREADS; i*=2) prefixSum(V, i);
+  unsigned int max_thread = std::thread::hardware_concurrency();
+
+  for(int i=1; i<=max_thread; i*=2)
+  {
+    prefixSum(V, V2, i);
+    std::cout << V2[(1<<30)-1] << std::endl;
+  }
 
   auto start   = std::chrono::high_resolution_clock::now();
   std::partial_sum(std::begin(V), std::end(V), std::begin(V));
@@ -94,5 +100,6 @@ int main()
 
   std::cout << "Sequantial partial_sum: " << usec << std::endl;
 
+  std::cout << "diff " << (
   return 0;
 }

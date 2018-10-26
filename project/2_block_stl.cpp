@@ -3,7 +3,6 @@
 
 */
 
-#include <bits/stdc++.h>
 #include "cxxopts.hpp"
 #include "clock.hpp"
 
@@ -55,7 +54,7 @@ namespace spm
           auto step1 = spm::timer::step(start_time);
 
           // PHASE 1: for each block compute the prefix-sum
-          std::vector<std::thread> threads_prefix(p);
+          std::vector<std::thread> threads_prefix;
           auto block_prefix = [&](std::tuple<int,int> range)
           {
             int a = std::get<0>(range);
@@ -66,7 +65,7 @@ namespace spm
 
           // Spawn threads
           for(unsigned int i=0; i<p; ++i)
-            threads_prefix[i] = std::thread(block_prefix, ranges[i]);
+            threads_prefix.push_back(std::thread(block_prefix, ranges[i]));
 
           // Join them
           for(auto &t : threads_prefix)
@@ -85,16 +84,19 @@ namespace spm
           auto step3 = spm::timer::step(start_time);
 
           // PHASE 3: parallel range add
-          std::vector<std::thread> threads_sum(p);
+          std::vector<std::thread> threads_sum;
           auto block_add = [&](std::tuple<int,int> range, int add)
           {
             int a = std::get<0>(range);
             int b = std::get<1>(range);
-	          for(; a<b; ++a) out[a] = f(out[a], add);
+            for(; a<b; ++a) out[a] = f(out[a], add);
           };
 
-          for(unsigned int i=0; i<p; ++i) threads_sum[i] = std::thread(block_add, ranges[i], block_sum[i]);
-          for(auto &t : threads_sum) t.join();
+          for(unsigned int i=0; i<p; ++i) 
+            threads_sum[i].push_back(std::thread(block_add, ranges[i], block_sum[i]));
+
+          for(auto &t : threads_sum) 
+            t.join();
 
           auto step4 = spm::timer::step(start_time);
 
@@ -117,7 +119,6 @@ namespace spm
     };
   }
 }
-
 
 #ifndef BENCHMARK
 int main()
@@ -150,5 +151,6 @@ int main()
   }
 
   return 0;
+
 }
 #endif
