@@ -13,21 +13,19 @@ namespace spm
 {
   namespace block
   {
-    template<class T> class parallelPrefixSTL
+    template<class T, T f(T,T)> class parallelPrefixSTL
     {
       private:
 
         std::vector<T> in;
-        std::function<T(T,T)> f;
         unsigned int p;
         bool debug;
 
       public:
 
-        parallelPrefixSTL(std::vector<T>& nin, std::function<T(T,T)> nf, unsigned int np)
+        parallelPrefixSTL(std::vector<T>& nin, unsigned int np)
         {
           in = nin;
-          f = nf;
           p = np;
           debug = false;
         }
@@ -117,12 +115,16 @@ namespace spm
   }
 }
 
+inline Tin op(Tin a,Tin b)
+{
+  return a^b;
+};
+
 #ifndef BENCHMARK
 int main()
 {
 
   // Create vector
-  auto op = [](Tin a,Tin b){return a^b;};
   std::vector<Tin> v(1<<30);
   std::vector<Tin> v_seq(1<<30);
   std::vector<Tin> v_par(1<<30);
@@ -134,11 +136,15 @@ int main()
   std::cout << "iota time " << stop_time_seq << std::endl;
 
   // Build parallel prefix comptator
-  spm::block::parallelPrefixSTL<Tin> test(v, op, 1);
+  spm::block::parallelPrefixSTL<Tin, op> test(v, 1);
   test.enableDebug(true);
 
   for(int k=30; k>= 20; k--)
   {
+    v.resize(1<<k);
+    v_seq.resize(1<<k);
+    v_par.resize(1<<k);
+
     // Sequential algorithm
     std::cout << "seq..." << std::endl;
     auto start_time_seq = spm::timer::start();
