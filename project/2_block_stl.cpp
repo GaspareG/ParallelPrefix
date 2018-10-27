@@ -3,8 +3,11 @@
 
 */
 
+#include <bits/stdc++.h>
 #include "cxxopts.hpp"
 #include "clock.hpp"
+
+using Tin = unsigned long int;
 
 namespace spm
 {
@@ -43,19 +46,19 @@ namespace spm
           int N = static_cast<int>(in.size());
           int block_size = N / p;
           std::vector<std::tuple<int,int>> ranges(p);
+
           for(unsigned int i=0; i<p; ++i)
           {
             int start = i*block_size;
-            int end = std::min(N, static_cast<int>((i+1)*block_size));
+            int end = (i == p-1) ? N : (i+1)*block_size;
             ranges[i] = std::make_tuple(start, end);
           }
-          std::get<1>(ranges[p-1]) = N;
 
           auto step1 = spm::timer::step(start_time);
 
           // PHASE 1: for each block compute the prefix-sum
           std::vector<std::thread> threads_prefix;
-          auto block_prefix = [&](std::tuple<int,int> range)
+          auto block_prefix = [&](const std::tuple<int,int>& range)
           {
             int a = std::get<0>(range);
             int b = std::get<1>(range);
@@ -63,13 +66,9 @@ namespace spm
       	    for(++a; a<b; ++a) out[a] = f(in[a],out[a-1]);
           };
 
-          // Spawn threads
-          for(unsigned int i=0; i<p; ++i)
-            threads_prefix.push_back(std::thread(block_prefix, ranges[i]));
-
-          // Join them
-          for(auto &t : threads_prefix)
-            t.join();
+          // Spawn threads & join them
+          for(unsigned int i=0; i<p; ++i) threads_prefix.emplace_back(block_prefix, ranges[i]);
+          for(auto &t : threads_prefix) t.join();
 
           auto step2 = spm::timer::step(start_time);
 
@@ -85,26 +84,24 @@ namespace spm
 
           // PHASE 3: parallel range add
           std::vector<std::thread> threads_sum;
-          auto block_add = [&](std::tuple<int,int> range, int add)
+          auto block_add = [&](const std::tuple<int,int>& range, T add)
           {
             int a = std::get<0>(range);
             int b = std::get<1>(range);
             for(; a<b; ++a) out[a] = f(out[a], add);
           };
 
-          for(unsigned int i=0; i<p; ++i) 
-            threads_sum[i].push_back(std::thread(block_add, ranges[i], block_sum[i]));
-
-          for(auto &t : threads_sum) 
-            t.join();
+          // Spawn threads & join them
+          for(unsigned int i=0; i<p; ++i) threads_sum.emplace_back(block_add, ranges[i], block_sum[i]);
+          for(auto &t : threads_sum) t.join();
 
           auto step4 = spm::timer::step(start_time);
 
           if(debug)
           {
-            step2 = step2-step1;
-            step3 = step3-step2;
             step4 = step4-step3;
+            step3 = step3-step2;
+            step2 = step2-step1;
             std::cerr << "PHASE1 " << step1 << "msec" << std::endl;
             std::cerr << "PHASE2 " << step2 << "msec" << std::endl;
             std::cerr << "PHASE3 " << step3 << "msec" << std::endl;
@@ -124,29 +121,39 @@ namespace spm
 int main()
 {
 
-  auto op = [](int a,int b){return a^b;};
-  std::vector<int> v(1<<30);
-  std::vector<int> v_seq(1<<30);
-  std::vector<int> v_par(1<<30);
+  // Create vector
+  auto op = [](Tin a,Tin b){return a^b;};
+  std::vector<Tin> v(1<<30);
+  std::vector<Tin> v_seq(1<<30);
+  std::vector<Tin> v_par(1<<30);
 
-  spm::block::parallelPrefixSTL<int> test(v, op, 1);
+  std::cout << "iota..." << std::endl;
+  auto start_time_seq = spm::timer::start();
+  std::iota(std::begin(v), std::end(v), 1);
+  auto stop_time_seq = spm::timer::step(start_time_seq);
+  std::cout << "iota time " << stop_time_seq << std::endl;
 
+  // Build parallel prefix comptator
+  spm::block::parallelPrefixSTL<Tin> test(v, op, 1);
   test.enableDebug(true);
 
-  std::partial_sum(std::begin(v), std::end(v), std::begin(v_seq), op);
-
-  unsigned int max_thread = std::thread::hardware_concurrency();
-
-  for(unsigned int i=1; i<=max_thread; i*=2)
+  for(int k=30; k>= 20; k--)
   {
-    test.setParallelismDegree(i);
-    auto start_time = spm::timer::start();
-    test.start(v_par);
-    auto stop_time = spm::timer::step(start_time);
-    std::cout << "nthreads \t" << i << " time " << stop_time << std::endl;
-    if(v_seq != v_par)
+    // Sequential algorithm
+    std::cout << "seq..." << std::endl;
+    auto start_time_seq = spm::timer::start();
+    std::partial_sum(std::begin(v), std::end(v), std::begin(v_seq), op);
+    auto stop_time_seq = spm::timer::step(start_time_seq);
+    std::cout << "seq time " << stop_time_seq << std::endl;
+
+    unsigned int max_thread = std::thread::hardware_concurrency();
+    for(unsigned int i=1; i<=max_thread; i*=2)
     {
-      std::cout << "ERRORE!" << std::endl;
+      test.setParallelismDegree(i);
+      auto start_time = spm::timer::start();
+      test.start(v_par);
+      auto stop_time = spm::timer::step(start_time);
+      std::cout << "nthreads \t" << i << " time " << stop_time << std::endl;
     }
   }
 
