@@ -13,7 +13,7 @@ namespace spm
 {
   namespace block
   {
-    template<class T, T f(T,T)> class parallelPrefixSTL
+    template<class T, T op(T,T)> class parallelPrefixSTL
     {
       private:
 
@@ -61,7 +61,7 @@ namespace spm
             int a = std::get<0>(range);
             int b = std::get<1>(range);
       	    out[a] = in[a];
-      	    for(++a; a<b; ++a) out[a] = f(in[a],out[a-1]);
+      	    for(++a; a<b; ++a) out[a] = op(in[a],out[a-1]);
           };
 
           // Spawn threads & join them
@@ -75,7 +75,7 @@ namespace spm
           for(unsigned int i=1; i<p; ++i)
           {
             T el = out[std::get<1>(ranges[i-1])-1];
-            block_sum[i] = f(block_sum[i-1], el);
+            block_sum[i] = op(block_sum[i-1], el);
           }
 
           auto step3 = spm::timer::step(start_time);
@@ -86,7 +86,7 @@ namespace spm
           {
             int a = std::get<0>(range);
             int b = std::get<1>(range);
-            for(; a<b; ++a) out[a] = f(out[a], add);
+            for(; a<b; ++a) out[a] = op(out[a], add);
           };
 
           // Spawn threads & join them
@@ -115,10 +115,7 @@ namespace spm
   }
 }
 
-inline Tin op(Tin a,Tin b)
-{
-  return a^b;
-};
+inline Tin op(Tin a,Tin b){ return a^b; };
 
 #ifndef BENCHMARK
 int main()
@@ -160,6 +157,7 @@ int main()
       test.start(v_par);
       auto stop_time = spm::timer::step(start_time);
       std::cout << "nthreads \t" << i << " time " << stop_time << std::endl;
+      if(v_seq != v_par) std::cout << "ERROR" << std::endl;
     }
   }
 
