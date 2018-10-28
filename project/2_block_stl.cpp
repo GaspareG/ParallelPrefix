@@ -37,6 +37,7 @@ namespace spm
 
         void start(std::vector<T>& out)
         {
+
           // assert(in.size() == out.size())
           auto start_time = spm::timer::start();
 
@@ -55,7 +56,9 @@ namespace spm
           auto step1 = spm::timer::step(start_time);
 
           // PHASE 1: for each block compute the prefix-sum
-          std::vector<std::thread> threads_prefix;
+
+          // Lambda function that given a range (begin, end)
+          // compute the prefix sum of only in[begin..end-1]
           auto block_prefix = [&](const std::tuple<int,int>& range)
           {
             int a = std::get<0>(range);
@@ -65,6 +68,7 @@ namespace spm
           };
 
           // Spawn threads & join them
+          std::vector<std::thread> threads_prefix;
           for(unsigned int i=0; i<p; ++i) threads_prefix.emplace_back(block_prefix, ranges[i]);
           for(auto &t : threads_prefix) t.join();
 
@@ -81,7 +85,6 @@ namespace spm
           auto step3 = spm::timer::step(start_time);
 
           // PHASE 3: parallel range add
-          std::vector<std::thread> threads_sum;
           auto block_add = [&](const std::tuple<int,int>& range, T add)
           {
             int a = std::get<0>(range);
@@ -90,6 +93,7 @@ namespace spm
           };
 
           // Spawn threads & join them
+          std::vector<std::thread> threads_sum;
           for(unsigned int i=0; i<p; ++i) threads_sum.emplace_back(block_add, ranges[i], block_sum[i]);
           for(auto &t : threads_sum) t.join();
 
