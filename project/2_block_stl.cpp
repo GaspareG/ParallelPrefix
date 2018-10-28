@@ -119,7 +119,7 @@ namespace spm
   }
 }
 
-inline Tin op(Tin a,Tin b){ return a^b; };
+inline Tin op(Tin a,Tin b){ return a^b; }
 
 #ifndef BENCHMARK
 int main()
