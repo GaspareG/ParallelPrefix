@@ -4,15 +4,19 @@ mkdir -p bin
 rm "bin/benchmark"
 
 echo "Compiling..."
-g++ -O3 -Ofast -Wall -Wextra -pedantic -std=c++17 -fconcepts -lpthread -fopenmp -marc=native -I$FF_ROOT -o bin/benchmark benchmark.cpp
+export FF_ROOT=$(pwd)
+time g++ -O3 -Ofast -Wall -Wextra -pedantic -std=c++17 -fconcepts -lpthread -fopenmp -march=native -I$FF_ROOT -o ./bin/benchmark benchmark.cpp
 
-echo "Done!"
+code=$?
+
+echo ""
+echo "Done! (return code ${code})"
 echo "Executable in ./bin/benchmark"
-echo ""
 
-echo "printing help..."
 echo ""
+echo "Printing help..."
 
+echo ""
 ./bin/benchmark --help
 
 #  -fcilkplus -lcilkrts

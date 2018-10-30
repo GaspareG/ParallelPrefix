@@ -31,7 +31,6 @@
       // t3 = msec time of third phase
 */
 
-
 #ifndef BLOCK_STL_HPP
 #define BLOCK_STL_HPP
 

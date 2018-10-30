@@ -91,7 +91,7 @@ namespace spm
       	    for(++a; a<b; ++a) output[a] = op((*input)[a], output[a-1]);
           };
 
-          #pragma omp parallel for schedule(static) num_threads(parDeg) private(i)
+          #pragma omp parallel for schedule(static) num_threads(parDeg)
           for(unsigned int i=0; i<parDeg; ++i)
             block_prefix(i);
 
@@ -115,7 +115,7 @@ namespace spm
               output[a] = op(output[a], block_sum[i-1]);
           };
 
-          #pragma omp parallel for schedule(static) num_threads(parDeg) private(i)
+          #pragma omp parallel for schedule(static) num_threads(parDeg)
           for(unsigned int i=1; i<parDeg; ++i)
             block_add(i);
 

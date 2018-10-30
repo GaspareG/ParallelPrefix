@@ -1,4 +1,5 @@
 #include <string>
+#include <thread>
 #include "utils/clock.hpp"
 #include "utils/cxxopts.hpp"
 
@@ -12,58 +13,78 @@ int main(int argc, char**argv)
 {
 
   // Options default value
-  bool help_f = false;
-  bool verbose_f  = false;
+  bool f_help = false;
+  bool f_verbose = false;
+  bool f_complete = false;
 
-  std::string input_s = "";
-  std::string output_s = "";
+  // Algorithm flags
+  bool f_seq        = false;
+  bool f_stl_block  = false;
+  bool f_stl_circ   = false;
+  bool f_ff_block   = false;
+  bool f_ff_circ    = false;
+  bool f_omp_block  = false;
+  bool f_omp_circ   = false;
+  bool f_cilk_block = false;
+  bool f_cilk_circ  = false;
 
+  bool f_all_block  = false;
+  bool f_all_circ   = false;
+  bool f_all        = false;
+
+  // Experiments parameters
   unsigned int experiments = 1;
-  unsigned int parallel = 0;
-  unsigned int N = 1048576;
+  unsigned int par_min = 1;
+  unsigned int par_max = std::thread::hardware_concurrency();
+  bool f_par_lin = false;
+  bool f_check = false;
 
-  bool sequential_f = false;
-
-  bool stl_block_f = false;
-  bool stl_horn_f = false;
-
-  bool ff_block_f = false;
-  bool ff_horn_f = false;
-
-  bool omp_block_f = false;
-  bool omp_horn_f = false;
-
-  bool all_f = false;
+  // Algorithms parameters
+  unsigned int k_min = 26;
+  unsigned int k_max = 30;
 
   // Parse arguments
-  cxxopts::Options options("benchmark", "Benchmark of all prefix-sum implementations");
+  cxxopts::Options options("benchmark", "Benchmark of all parallel-prefix implementations");
   options.add_options()
-    // Help flag
-    (       "h,help", "Print help",                                cxxopts::value(help_f))
-    // Stream options
-    (    "v,verbose", "Verbose log",                               cxxopts::value(verbose_f));
- /*   (      "i,input", "Input file name (default: stdin)",          cxxopts::value(input_s))
-    (     "o,output", "Output file name (default: stdout)",        cxxopts::value(output_s))
+    // Options
+    (      "h,help", "Print help",                                 cxxopts::value(f_help))
+    (   "v,verbose", "Verbose log (to std::cerr)",                 cxxopts::value(f_verbose))
+    (  "c,complete", "Execute smart benchmark (default: false)",   cxxopts::value(f_complete))
+
     // Algorithms to benchmark
-    (   "sequential", "Test STL sequential implementation ",       cxxopts::value(sequential_f))
-    (    "stl-block", "Test STL block implementation ",            cxxopts::value(stl_block_f))
-    (     "stl-circ", "Test STL circuit implementation ",          cxxopts::value(stl_horn_f))
-    (     "ff-block", "Test FF block implementation ",             cxxopts::value(ff_block_f))
-    (      "ff-circ", "Test FF circuit implementation ",           cxxopts::value(ff_horn_f))
-    (    "omp-block", "Test OMP block implementation ",            cxxopts::value(omp_block_f))
-    (     "omp-circ", "Test OMP circuit implementation ",          cxxopts::value(omp_horn_f))
-    (   "cilk-block", "Test CILK block implementation ",           cxxopts::value(omp_block_f))
-    (    "cilk-circ", "Test CILK circuit implementation ",         cxxopts::value(omp_horn_f))
-    (    "all-block", "Test all block implementations",            cxxopts::value(all_f))
-    (  "all-circuit", "Test all circuit implementations",          cxxopts::value(all_f))
-    (          "all", "Test all implementations",                  cxxopts::value(all_f))
+    (  "sequential", "Test STL sequential implementation ",        cxxopts::value(f_seq))
+    (   "stl-block", "Test STL block implementation ",             cxxopts::value(f_stl_block))
+    (    "stl-circ", "Test STL circuit implementation ",           cxxopts::value(f_stl_circ))
+    (    "ff-block", "Test FF block implementation ",              cxxopts::value(f_ff_block))
+    (     "ff-circ", "Test FF circuit implementation ",            cxxopts::value(f_ff_circ))
+    (   "omp-block", "Test OMP block implementation ",             cxxopts::value(f_omp_block))
+    (    "omp-circ", "Test OMP circuit implementation ",           cxxopts::value(f_omp_circ))
+    (  "cilk-block", "Test CILK block implementation ",            cxxopts::value(f_cilk_block))
+    (   "cilk-circ", "Test CILK circuit implementation ",          cxxopts::value(f_cilk_circ))
+    (   "all-block", "Test all block implementations",             cxxopts::value(f_all_block))
+    ( "all-circuit", "Test all circuit implementations",           cxxopts::value(f_all_circ))
+    (         "all", "Test all implementations",                   cxxopts::value(f_all))
+
     // Experiments parameters
-    ("e,experiments", "Number of experiments to run (default: 1)", cxxopts::value(experiments))
-    (   "p,parallel", "Parallelism degree (default: max)",         cxxopts::value(parallel))
+    (       "e,exp", "N° of experiments to run (default: 1)",      cxxopts::value(experiments))
+    (     "par-min", "Minimum parallelism degree (default: 1)",    cxxopts::value(par_min))
+    (     "par-max", "Maximum parallelism degree (default: max)",  cxxopts::value(par_max))
+    (     "par-lin", "Linear step in par degree (default: false)", cxxopts::value(f_par_lin))
+    (       "check", "Check for errors (default: false)",          cxxopts::value(f_check))
+
     // Algorithms parameters
-    (            "min-k", "Min power of size of the vector (default: 20 )",        cxxopts::value(N))
-*/
+    (       "k-min", "Min Log2 of vector size (default: 26)",        cxxopts::value(k_min))
+    (       "k-max", "Max Log2 of vector size (default: 30)",        cxxopts::value(k_max))
+
+
+  ;
   auto result = options.parse(argc, argv);
+
+  if(f_help)
+  {
+    std::cout << options.help() << std::endl;
+    return 0;
+  }
 
   return 0;
 }

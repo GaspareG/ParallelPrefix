@@ -34,7 +34,7 @@
 #include <utility>
 #include <numeric>
 #include <thread>
-#include "clock.hpp"
+#include "utils/clock.hpp"
 
 namespace spm
 {
