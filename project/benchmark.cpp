@@ -1,13 +1,19 @@
 #include <string>
-#include "clock.hpp"
-#include "cxxopts.hpp"
+#include "utils/clock.hpp"
+#include "utils/cxxopts.hpp"
+
+#include "seq_stl.hpp"
+#include "block_stl.hpp"
+#include "block_omp.hpp"
+#include "block_ff.hpp"
+// #include "block_cilk.hpp"
 
 int main(int argc, char**argv)
 {
 
   // Options default value
-  bool help = false;
-  bool verbose = false;
+  bool help_f = false;
+  bool verbose_f  = false;
 
   std::string input_s = "";
   std::string output_s = "";
@@ -35,24 +41,28 @@ int main(int argc, char**argv)
     // Help flag
     (       "h,help", "Print help",                                cxxopts::value(help_f))
     // Stream options
-    (    "v,verbose", "Verbose log",                               cxxopts::value(verbose_f))
-    (      "i,input", "Input file name (default: stdin)",          cxxopts::value(input_s))
+    (    "v,verbose", "Verbose log",                               cxxopts::value(verbose_f));
+ /*   (      "i,input", "Input file name (default: stdin)",          cxxopts::value(input_s))
     (     "o,output", "Output file name (default: stdout)",        cxxopts::value(output_s))
     // Algorithms to benchmark
-    (   "sequential", "Test stl sequential implementation ",       cxxopts::value(sequential_f))
-    (    "stl-block", "Test stl block implementation ",            cxxopts::value(stl_block_f))
-    (     "stl-horn", "Test stl horn implementation ",             cxxopts::value(stl_horn_f))
-    (     "ff-block", "Test ff block implementation ",             cxxopts::value(ff_block_f))
-    (      "ff-horn", "Test ff horn implementation ",              cxxopts::value(ff_horn_f))
-    (    "omp-block", "Test omp block implementation ",            cxxopts::value(omp_block_f))
-    (     "omp-horn", "Test omp horn implementation ",             cxxopts::value(omp_horn_f))
+    (   "sequential", "Test STL sequential implementation ",       cxxopts::value(sequential_f))
+    (    "stl-block", "Test STL block implementation ",            cxxopts::value(stl_block_f))
+    (     "stl-circ", "Test STL circuit implementation ",          cxxopts::value(stl_horn_f))
+    (     "ff-block", "Test FF block implementation ",             cxxopts::value(ff_block_f))
+    (      "ff-circ", "Test FF circuit implementation ",           cxxopts::value(ff_horn_f))
+    (    "omp-block", "Test OMP block implementation ",            cxxopts::value(omp_block_f))
+    (     "omp-circ", "Test OMP circuit implementation ",          cxxopts::value(omp_horn_f))
+    (   "cilk-block", "Test CILK block implementation ",           cxxopts::value(omp_block_f))
+    (    "cilk-circ", "Test CILK circuit implementation ",         cxxopts::value(omp_horn_f))
+    (    "all-block", "Test all block implementations",            cxxopts::value(all_f))
+    (  "all-circuit", "Test all circuit implementations",          cxxopts::value(all_f))
     (          "all", "Test all implementations",                  cxxopts::value(all_f))
     // Experiments parameters
     ("e,experiments", "Number of experiments to run (default: 1)", cxxopts::value(experiments))
     (   "p,parallel", "Parallelism degree (default: max)",         cxxopts::value(parallel))
     // Algorithms parameters
-    (            "n", "Size of the vector (default: 2^20)",        cxxopts::value(N))
-
+    (            "min-k", "Min power of size of the vector (default: 20 )",        cxxopts::value(N))
+*/
   auto result = options.parse(argc, argv);
 
   return 0;

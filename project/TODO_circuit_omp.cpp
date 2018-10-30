@@ -25,7 +25,7 @@ std::tuple<int,int> G2(int t, int k, int m)
 int main()
 {
 
-  int m = 20;
+  int m = 5;
   int n = 1<<m;
 
   std::vector<int> v(n);
@@ -49,7 +49,7 @@ int main()
   for(int t=1; t<=m; t++)
   {
     auto start_time = spm::timer::start();
-    #pragma omp parallel for schedule(static)
+    //#pragma omp parallel for schedule(static)
     for(int k=1; k<=K1(t, m); k++)
     {
       auto [l, r] = G1(t, k);
@@ -63,7 +63,7 @@ int main()
   for(int t=1; t<m; t++)
   {
     auto start_time = spm::timer::start();
-    #pragma omp parallel for schedule(static)
+    //#pragma omp parallel for schedule(static)
     for(int k=1; k<=K2(t); k++)
     {
       auto [l, r] = G2(t, k, m);
