@@ -17,9 +17,9 @@
 // #include "block_cilk.hpp"
 
 // Circuit algorithm implemenation
-#include "circuit_stl.hpp"
-#include "circuit_omp.hpp"
-#include "circuit_ff.hpp"
+// #include "circuit_stl.hpp"
+// #include "circuit_omp.hpp"
+// #include "circuit_ff.hpp"
 // #include "circuit_cilk.hpp"
 
 // Vector size define
@@ -108,9 +108,8 @@ int main(int argc, char**argv)
     (     "dataset", "Input dataset (default 0: rnd, 1: 1s, 2: incr)", cxxopts::value(dataset))
 
     // Algorithms parameters
-    (       "k-min", "Min Log2 of vector size (default: K_MIN_DEFAULT)", cxxopts::value(k_min))
-    (       "k-max", "Max Log2 of vector size (default: K_MAX_DEFAULT)", cxxopts::value(k_max))
-  ;
+    (       "k-min", "Min log2 of vector size (default: 26)",          cxxopts::value(k_min))
+    (       "k-max", "Max log2 of vector size (default: 30)",          cxxopts::value(k_max));
 
   // Parse arguments
   auto result = options.parse(argc, argv);
@@ -165,18 +164,22 @@ int main(int argc, char**argv)
     return 0;
   }
 
+  // Check vector size
   if(!(K_MIN <= k_min && k_min <= k_max && k_max <= K_MAX))
   {
     std::cout << "Error in vector size (check k_min and k_max options)" << std::endl;
     return 0;
   }
 
+  // Check parallelism degree
   if(!(1 <= par_min && par_min <= par_max && par_max <= max_threads))
   {
     std::cout << "Error in parallelism degree (check par_min and par_max options)" << std::endl;
     return 0;
   }
-
+ 
+  // Check dataset
+  
   // Create dataset
   std::shared_ptr<std::vector<test_t>> input_data = std::make_shared<std::vector<test_t>>();
 

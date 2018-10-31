@@ -42,6 +42,7 @@
 #include <numeric>
 #include <thread>
 #include "utils/clock.hpp"
+#include "utils/ranges.hpp"
 
 namespace spm
 {
@@ -70,16 +71,9 @@ namespace spm
 
           // assert(in.size() == out.size())
 
-          int N = static_cast<int>(input->size());
+          unsigned int N = static_cast<unsigned int>(input->size());
 
-          int block_size = N / parDeg;
-
-          auto ranges = [&](const unsigned int i)
-          {
-            int start = i*block_size;
-            int end = (i == parDeg-1) ? N : (i+1)*block_size;
-            return std::array<int, 2>{start, end};
-          };
+   	  spm::range_t ranges(N, parDeg);
 
           auto start_time = spm::timer::start();
 
@@ -93,7 +87,7 @@ namespace spm
 
           std::vector<std::thread> threads_prefix;
 
-          for(unsigned int i=0; i<parDeg; ++i)
+          for(unsigned int i=0; i<ranges.blocks(); ++i)
             threads_prefix.emplace_back(block_prefix, i);
 
           for(auto &t : threads_prefix)
@@ -101,10 +95,10 @@ namespace spm
 
           auto step1 = spm::timer::step(start_time);
           /*******************************************************************/
-          std::vector<T> block_sum(parDeg);
+          std::vector<T> block_sum(ranges.blocks());
           block_sum[0] = output[std::get<1>(ranges(0))-1];
 
-          for(unsigned int i=1; i<parDeg; ++i)
+          for(unsigned int i=1; i<ranges.blocks(); ++i)
           {
             T el = output[std::get<1>(ranges(i))-1];
             block_sum[i] = op(block_sum[i-1], el);
@@ -121,7 +115,7 @@ namespace spm
 
           std::vector<std::thread> threads_sum;
 
-          for(unsigned int i=1; i<parDeg; ++i)
+          for(unsigned int i=1; i<ranges.blocks(); ++i)
             threads_sum.emplace_back(block_add, i);
           for(auto &t : threads_sum)
             t.join();

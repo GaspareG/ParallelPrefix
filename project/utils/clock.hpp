@@ -8,7 +8,6 @@ namespace spm
   namespace timer
   {
 
-
     auto start()
     {
       return std::chrono::high_resolution_clock::now();

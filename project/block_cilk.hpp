@@ -116,7 +116,7 @@ namespace spm
               output[a] = op(output[a], block_sum[i-1]);
           };
 
-          click_for(unsigned int i=1; i<parDeg; ++i)
+          cilk_for(unsigned int i=1; i<parDeg; ++i)
           {
             block_add(i);
           }

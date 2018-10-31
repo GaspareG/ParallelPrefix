@@ -69,43 +69,78 @@ namespace spm
         void start(std::vector<T>& output)
         {
 
-          // assert(in.size() == out.size())
 
-          int n = static_cast<int>(input->size());
+          unsigned int n = static_cast<unsigned int>(input->size());
           int m = 1; // m = log2(n);
 
           while((1<<m) < n) m++;
 
+          // assert(in.size() == out.size())
           // assert((1<<m) == n);
+
+          spm::range_t ranges(N, parDeg);
 
           auto start_time = spm::timer::start();
 
+          // TODO
           /*******************************************************************/
-          // #pragma omp parallel for schedule(static) num_threads(parDeg)
-          for(int k=1; k<=spm::circuit::k1(1, m); k++)
+          std::vector<std::thread> threads_phase1;
+
+          auto phase1_f = [&](const long int i)
           {
-            auto [l, r] = spm::circuit::g1(1, k);
-            output[l] = (*input[l]);
-            output[r] = op((*input)[l], (*input)[r]);
-          }
+            auto [k1, k2] = ranges(i);
+            for(int k=k1; k<k2; k++)
+            {
+              auto [l, r] = spm::circuit::g1(1, k);
+              output[l] = (*input[l]);
+              output[r] = op((*input)[l], (*input)[r]);
+            } 
+          };
+
+          for(unsigned int i=0; i<ranges.blocks(); ++i)
+            threads_phase1.emplace_back(phase1_f, i);
+
+          for(auto &t : threads_phase1)
+            t.join();
 
           auto step1 = spm::timer::step(start_time);
+          // TODO
           /*******************************************************************/
-          for(int t=2; t<=m; t++)
+          std::vector<std::thread> threads_phase2;
+
+          auto phase2_f = [&](const long int i, const long int t)
           {
-            // #pragma omp parallel for schedule(static) num_threads(parDeg)
+            auto [k1, k2] = ranges(i);
             for(int k=1; k<=spm::circuit::k1(t, m); k++)
             {
               auto [l, r] = spm::circuit::g1(t, k);
               output[r] = op(output[l], output[r]);
             }
+          };
+
+          for(int t=2; t<=m; t++)
+          {
+            for(unsigned int i=0; i<ranges.blocks(); ++i)
+              threads_phase2.emplace_back(phase2_f, i, t);
+
+            for(auto &t : threads_phase2)
+              t.join();
+
+            threads_phase2.clear();
           }
 
           auto step2 = spm::timer::step(start_time);
+          // TODO
           /*******************************************************************/
+          std::vector<std::thread> threads_phase3;
+
+          auto phase3_f = [&](const long int i, const long int t)
+          {
+
+          }
+
           for(int t=1; t<m; t++)
           {
-            // #pragma omp parallel for schedule(static) num_threads(parDeg)
             for(int k=1; k<=spm::circuit::k2(t); k++)
             {
               auto [l, r] = spm::circuit::g2(t, k, m);
@@ -114,6 +149,7 @@ namespace spm
           }
 
           auto step3 = spm::timer::step(start_time);
+          // TODO
           /*******************************************************************/
 
           step3 = step2 - step2;
