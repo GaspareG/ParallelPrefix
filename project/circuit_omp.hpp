@@ -1,16 +1,16 @@
 /*
-        filename: block_omp.hpp
+        filename: circuit_omp.hpp
           author: Gaspare Ferraro <ferraro@gaspa.re>
   student number: 520549
           degree: MD in CS: Data and Knowledge Science and Technologies
             exam: Parallel and Distributed Systems: Paradigms and Models
 
-     description: Implementation with OpenMP API of the block parallel prefix computation
+     description: Implementation with OpenMP API of the circuit parallel prefix computation
 
      class usage:
 
       // Create object
-      spm::block::parallelPrefixOMP<T, op> pp_omp(input, parDegree);
+      spm::circuit::parallelPrefixOMP<T, op> pp_omp(input, parDegree);
       // T type of elements in vectors
       // op binary function (T,T) -> T (commutative and associative)
       // input = shared pointer of input vector (of type T)
@@ -31,8 +31,8 @@
       // t3 = msec time of third phase
 */
 
-#ifndef BLOCK_OMP_HPP
-#define BLOCK_OMP_HPP
+#ifndef CIRCUIT_OMP_HPP
+#define CIRCUIT_OMP_HPP
 
 #include <vector>
 #include <memory>
@@ -42,10 +42,11 @@
 #include <numeric>
 #include <omp.h>
 #include "utils/clock.hpp"
+#include "utils/circuit.hpp"
 
 namespace spm
 {
-  namespace block
+  namespace circuit
   {
     template<class T, T op(T,T)> class parallelPrefixOMP
     {
@@ -70,60 +71,53 @@ namespace spm
 
           // assert(in.size() == out.size())
 
-          int N = static_cast<int>(input->size());
+          int n = static_cast<int>(input->size());
+          int m = 1; // m = log2(n);
 
-          int block_size = N / parDeg;
+          while((1<<m) < n) m++;
 
-          auto ranges = [&](const unsigned int i)
-          {
-            int start = i*block_size;
-            int end = (i == parDeg-1) ? N : (i+1)*block_size;
-            return std::array<int, 2>{start, end};
-          };
+          // assert((1<<m) == n);
 
           auto start_time = spm::timer::start();
 
           /*******************************************************************/
-          auto block_prefix = [&](const unsigned int i)
-          {
-            auto [a, b] = ranges(i);
-      	    output[a] = (*input)[a];
-      	    for(++a; a<b; ++a) output[a] = op((*input)[a], output[a-1]);
-          };
-
           #pragma omp parallel for schedule(static) num_threads(parDeg)
-          for(unsigned int i=0; i<parDeg; ++i)
-            block_prefix(i);
+          for(int k=1; k<=spm::circuit::k1(1, m); k++)
+          {
+            auto [l, r] = spm::circuit::g1(1, k);
+            output[l] = (*input[l]);
+            output[r] = op((*input)[l], (*input)[r]);
+          }
 
           auto step1 = spm::timer::step(start_time);
           /*******************************************************************/
-          std::vector<T> block_sum(parDeg);
-          block_sum[0] = output[std::get<1>(ranges(0))-1];
-
-          for(unsigned int i=1; i<parDeg; ++i)
+          for(int t=2; t<=m; t++)
           {
-            T el = output[std::get<1>(ranges(i))-1];
-            block_sum[i] = op(block_sum[i-1], el);
+            #pragma omp parallel for schedule(static) num_threads(parDeg)
+            for(int k=1; k<=spm::circuit::k1(t, m); k++)
+            {
+              auto [l, r] = spm::circuit::g1(t, k);
+              output[r] = op(output[l], output[r]);
+            }
           }
 
           auto step2 = spm::timer::step(start_time);
           /*******************************************************************/
-          auto block_add = [&](const unsigned int i)
+          for(int t=1; t<m; t++)
           {
-            auto [a, b] = ranges(i);
-            for(; a<b; ++a)
-              output[a] = op(output[a], block_sum[i-1]);
-          };
-
-          #pragma omp parallel for schedule(static) num_threads(parDeg)
-          for(unsigned int i=1; i<parDeg; ++i)
-            block_add(i);
+            #pragma omp parallel for schedule(static) num_threads(parDeg)
+            for(int k=1; k<=spm::circuit::k2(t); k++)
+            {
+              auto [l, r] = spm::circuit::g2(t, k, m);
+              output[r] = op(output[l], output[r]);
+            }
+          }
 
           auto step3 = spm::timer::step(start_time);
           /*******************************************************************/
 
-          step3 = step3-step2;
-          step2 = step2-step1;
+          step3 = step2 - step2;
+          step2 = step2 - step1;
 
           last_test = {step1, step2, step3};
         }

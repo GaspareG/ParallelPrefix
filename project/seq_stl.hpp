@@ -67,7 +67,7 @@ namespace spm
           auto step1 = spm::timer::step(start_time);
           /*******************************************************************/
 
-          last_test = std::array<spm::timer::ms_t, 1>{step1};
+          last_test = {step1};
         }
 
         std::array<spm::timer::ms_t, 1> getLastTest()

@@ -83,6 +83,8 @@ namespace spm
 
           auto start_time = spm::timer::start();
 
+          ff::ParallelFor pf(parDeg);
+
           /*******************************************************************/
           auto block_prefix = [&](const long i)
           {
@@ -91,8 +93,7 @@ namespace spm
       	    for(++a; a<b; ++a) output[a] = op((*input)[a], output[a-1]);
           };
 
-          ff::ParallelFor pf_phase1(parDeg);
-          pf_phase1.parallel_for(0, parDeg, block_prefix);
+          pf.parallel_for(0, parDeg, block_prefix);
 
           auto step1 = spm::timer::step(start_time);
           /*******************************************************************/
@@ -114,8 +115,7 @@ namespace spm
               output[a] = op(output[a], block_sum[i-1]);
           };
 
-          ff::ParallelFor pf_phase3(parDeg);
-          pf_phase3.parallel_for(1, parDeg, block_add);
+          pf.parallel_for(1, parDeg, block_add);
 
           auto step3 = spm::timer::step(start_time);
           /*******************************************************************/
@@ -123,7 +123,7 @@ namespace spm
           step3 = step3-step2;
           step2 = step2-step1;
 
-          last_test = std::array<spm::timer::ms_t, 3>{step1, step2, step3};
+          last_test = {step1, step2, step3};
         }
 
         std::array<spm::timer::ms_t, 3> getLastTest()

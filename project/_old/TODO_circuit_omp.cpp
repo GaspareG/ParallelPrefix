@@ -8,18 +8,18 @@ int op(int a, int b){ return a^b; }
 inline int K1(int t, int m){ return (1<<(m-t)); }
 inline int K2(int t){ return (1<<t) - 1; }
 
-std::tuple<int,int> G1(int t, int k)
+inline std::array<int, 2> G1(int t, int k)
 {
   int l = (k*(1<<t)) - (1<<(t-1)) - 1;
   int r = (k*(1<<t)) - 1;
-  return std::make_tuple(l, r);
+  return std::make_array<int, 2>{l, r};
 }
 
-std::tuple<int,int> G2(int t, int k, int m)
+inline std::array<int, 2> G2(int t, int k, int m)
 {
   int l = (k*(1<<(m-t))) - 1;
   int r = (k*(1<<(m-t))) + (1<<(m-t-1)) - 1;
-  return std::make_tuple(l, r);
+  return std::make_array<int, 2>{l, r};
 }
 
 int main()
@@ -40,16 +40,13 @@ int main()
   std::cout << "seq time " << stop_time_seq << std::endl;
 
   // Omp parallel threads
-  omp_set_dynamic(0);
-  omp_set_num_threads(32);
-
   auto start_time_tot = spm::timer::start();
 
   // Phase 1
   for(int t=1; t<=m; t++)
   {
     auto start_time = spm::timer::start();
-    //#pragma omp parallel for schedule(static)
+    #pragma omp parallel for schedule(static) num_threads(p)
     for(int k=1; k<=K1(t, m); k++)
     {
       auto [l, r] = G1(t, k);
