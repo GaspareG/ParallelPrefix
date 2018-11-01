@@ -5,7 +5,7 @@
           degree: MD in CS: Data and Knowledge Science and Technologies
             exam: Parallel and Distributed Systems: Paradigms and Models
 
-     description: Implementation with STL Thread of the circuit parallel prefix computation
+     description: Implementation with STL Threads of the circuit parallel prefix computation
 
      class usage:
 
@@ -69,49 +69,52 @@ namespace spm
         void start(std::vector<T>& output)
         {
 
+          // assert(in.size() == out.size())
 
-          unsigned int n = static_cast<unsigned int>(input->size());
+          int n = static_cast<int>(input->size());
           int m = 1; // m = log2(n);
 
           while((1<<m) < n) m++;
 
-          // assert(in.size() == out.size())
           // assert((1<<m) == n);
-
-          spm::range_t ranges(N, parDeg);
 
           auto start_time = spm::timer::start();
 
-          // TODO
           /*******************************************************************/
-          std::vector<std::thread> threads_phase1;
+          spm::range_t ranges_p1(spm::circuit::k1(1, m), parDeg);
 
-          auto phase1_f = [&](const long int i)
+          auto circuit_f1 = [&](const unsigned int i)
           {
-            auto [k1, k2] = ranges(i);
-            for(int k=k1; k<k2; k++)
+            auto [a, b] = ranges_p1(i);
+            a++;
+            b++;
+            for(a; a<b; a++)
             {
-              auto [l, r] = spm::circuit::g1(1, k);
-              output[l] = (*input[l]);
+              auto [l, r] = spm::circuit::g1(1, a);
+              output[l] = (*input)[l];
               output[r] = op((*input)[l], (*input)[r]);
-            } 
+            }
           };
 
-          for(unsigned int i=0; i<ranges.blocks(); ++i)
-            threads_phase1.emplace_back(phase1_f, i);
+          std::vector<std::thread> threads_p1;
 
-          for(auto &t : threads_phase1)
+          for(unsigned int i=0; i<ranges_p1.blocks(); ++i)
+            threads_p1.emplace_back(circuit_f1, i);
+
+          for(auto &t : threads_p1)
             t.join();
 
           auto step1 = spm::timer::step(start_time);
-          // TODO
           /*******************************************************************/
-          std::vector<std::thread> threads_phase2;
+          std::vector<std::thread> threads_p2;
+          spm::range_t ranges_p2(spm::circuit::k1(2, m), parDeg);
 
-          auto phase2_f = [&](const long int i, const long int t)
+          auto circuit_f2 = [&](const unsigned int i, const int t)
           {
-            auto [k1, k2] = ranges(i);
-            for(int k=1; k<=spm::circuit::k1(t, m); k++)
+            auto [a, b] = ranges_p2(i);
+            a++;
+            b++;
+            for(int k=a; k<b; k++)
             {
               auto [l, r] = spm::circuit::g1(t, k);
               output[r] = op(output[l], output[r]);
@@ -120,36 +123,48 @@ namespace spm
 
           for(int t=2; t<=m; t++)
           {
-            for(unsigned int i=0; i<ranges.blocks(); ++i)
-              threads_phase2.emplace_back(phase2_f, i, t);
+            ranges_p2 = spm::range_t(spm::circuit::k1(t, m), parDeg);
 
-            for(auto &t : threads_phase2)
+            for(unsigned int i=0; i<ranges_p2.blocks(); ++i)
+              threads_p2.emplace_back(circuit_f2, i, t);
+
+            for(auto &t : threads_p2)
               t.join();
 
-            threads_phase2.clear();
+            threads_p2.clear();
           }
 
           auto step2 = spm::timer::step(start_time);
-          // TODO
           /*******************************************************************/
-          std::vector<std::thread> threads_phase3;
+          std::vector<std::thread> threads_p3;
+          spm::range_t ranges_p3(spm::circuit::k2(1), parDeg);
 
-          auto phase3_f = [&](const long int i, const long int t)
+          auto circuit_f3 = [&](const unsigned int i, const int t, const int m)
           {
-
-          }
-
-          for(int t=1; t<m; t++)
-          {
-            for(int k=1; k<=spm::circuit::k2(t); k++)
+            auto [a, b] = ranges_p3(i);
+            a++;
+            b++;
+            for(int k=a; k<b; k++)
             {
               auto [l, r] = spm::circuit::g2(t, k, m);
               output[r] = op(output[l], output[r]);
             }
+          };
+
+          for(int t=1; t<m; t++)
+          {
+            ranges_p3 = spm::range_t(spm::circuit::k2(t), parDeg);
+
+            for(unsigned int i=0; i<ranges_p3.blocks(); ++i)
+              threads_p3.emplace_back(circuit_f3, i, t, m);
+
+            for(auto &t : threads_p3)
+              t.join();
+
+            threads_p3.clear();
           }
 
           auto step3 = spm::timer::step(start_time);
-          // TODO
           /*******************************************************************/
 
           step3 = step2 - step2;

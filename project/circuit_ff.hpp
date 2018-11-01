@@ -85,7 +85,7 @@ namespace spm
           /*******************************************************************/
           pf.parallel_for(1, spm::circuit::k1(1, m)+1, [&](const long int k){
             auto [l, r] = spm::circuit::g1(1, k);
-            output[l] = (*input[l]);
+            output[l] = (*input)[l];
             output[r] = op((*input)[l], (*input)[r]);
           });
 

@@ -4,6 +4,7 @@
 #include <vector>
 #include <numeric>
 #include <utility>
+#include <random>
 #include "utils/clock.hpp"
 #include "utils/cxxopts.hpp"
 
@@ -17,24 +18,37 @@
 // #include "block_cilk.hpp"
 
 // Circuit algorithm implemenation
-// #include "circuit_stl.hpp"
-// #include "circuit_omp.hpp"
-// #include "circuit_ff.hpp"
+#include "circuit_stl.hpp"
+#include "circuit_omp.hpp"
+#include "circuit_ff.hpp"
 // #include "circuit_cilk.hpp"
 
 // Vector size define
-#define K_MIN_DEFAULT 26
-#define K_MAX_DEFAULT 30
+#define M_MIN_DEFAULT 26
+#define M_MAX_DEFAULT 30
 
-#define K_MIN 10
-#define K_MAX 30
+#define M_MIN 1
+#define M_MAX 30
+
+#define MAX_V 1024
 
 // vector type and lambda operation
 using test_t = unsigned long long int;
-auto op = [](const test_t a, const test_t b)
+auto op = [](test_t a, test_t b) -> test_t
 {
   return a+b;
 };
+
+template <typename T>
+std::ostream& operator<< (std::ostream& out, const std::vector<T>& v) {
+  if ( !v.empty() ) {
+    out << '[';
+    std::copy (v.begin(), v.end(), std::ostream_iterator<T>(out, ", "));
+    out << "\b\b]";
+  }
+  out << std::endl;
+  return out;
+}
 
 // Benchmark
 int main(int argc, char**argv)
@@ -69,12 +83,13 @@ int main(int argc, char**argv)
   unsigned int par_min = 1;
   unsigned int par_max = max_threads;
   unsigned int dataset = 0;
+  unsigned int seed = 42;
   bool f_par_lin = false;
   bool f_check = false;
 
   // Algorithms parameters
-  unsigned int k_min = K_MIN_DEFAULT;
-  unsigned int k_max = K_MAX_DEFAULT;
+  unsigned int m_min = M_MIN_DEFAULT;
+  unsigned int m_max = M_MAX_DEFAULT;
 
   // Parse arguments
   cxxopts::Options options("benchmark", "Benchmark of all parallel-prefix implementations");
@@ -106,10 +121,11 @@ int main(int argc, char**argv)
     (     "par-lin", "Linear step in par degree (default: false)",     cxxopts::value(f_par_lin))
     (       "check", "Check for errors (default: false)",              cxxopts::value(f_check))
     (     "dataset", "Input dataset (default 0: rnd, 1: 1s, 2: incr)", cxxopts::value(dataset))
+    (        "seed", "Seed for random number generator (default 42)",  cxxopts::value(seed))
 
     // Algorithms parameters
-    (       "k-min", "Min log2 of vector size (default: 26)",          cxxopts::value(k_min))
-    (       "k-max", "Max log2 of vector size (default: 30)",          cxxopts::value(k_max));
+    (       "m-min", "Min log2 of vector size (default: 26)",          cxxopts::value(m_min))
+    (       "m-max", "Max log2 of vector size (default: 30)",          cxxopts::value(m_max));
 
   // Parse arguments
   auto result = options.parse(argc, argv);
@@ -120,7 +136,7 @@ int main(int argc, char**argv)
     f_all = true;
     f_check = true;
     experiments = 5;
-    k_min = 20;
+    dataset = 1;
   }
 
   // Set experiments flag
@@ -161,30 +177,120 @@ int main(int argc, char**argv)
   if(f_help || !f_experiments)
   {
     std::cout << options.help() << std::endl;
-    return 0;
+    return 1;
   }
 
   // Check vector size
-  if(!(K_MIN <= k_min && k_min <= k_max && k_max <= K_MAX))
+  if(!(M_MIN <= m_min && m_min <= m_max && m_max <= M_MAX))
   {
-    std::cout << "Error in vector size (check k_min and k_max options)" << std::endl;
-    return 0;
+    std::cout << "Error in vector size (check m_min and m_max options)" << std::endl;
+    return 1;
   }
 
   // Check parallelism degree
   if(!(1 <= par_min && par_min <= par_max && par_max <= max_threads))
   {
     std::cout << "Error in parallelism degree (check par_min and par_max options)" << std::endl;
-    return 0;
+    return 1;
   }
- 
+
   // Check dataset
-  
+  if(!(0 <= dataset && dataset <= 2))
+  {
+    std::cout << "Error in dataset creation (check dataset option)" << std::endl;
+    return 1;
+  }
+
   // Create dataset
-  std::shared_ptr<std::vector<test_t>> input_data = std::make_shared<std::vector<test_t>>();
+  auto input = std::make_shared<std::vector<test_t>>(1<<m_max, 0);
+  std::vector<test_t> output_seq(1<<m_max, 0);
+  std::vector<test_t> output_par(1<<m_max, 0);
+
+  std::cout << dataset << std::endl;
+  if(dataset == 0)
+  {
+    std::mt19937 rng(seed);
+    for(int i=0; i<(1<<m_max); i++)
+      (*input)[i] = rng() % MAX_V;
+  }
+  else if(dataset == 1)
+  {
+    for(int i=0; i<(1<<m_max); i++)
+      (*input)[i] = 1;
+  }
+  else
+  {
+    for(int i=0; i<(1<<m_max); i++)
+      (*input)[i] = i;
+  }
+
+  // Create class for computation...
+
+  // Sequential
+  spm::sequential::sequentialPrefixSTL<test_t, op> seq_stl(input);
+
+  // Block-based
+  // spm::block::parallelPrefixCilk<test_t, op> block_cilk(input, par_min);
+  spm::block::parallelPrefixFF<test_t, op> block_ff(input, par_min);
+  spm::block::parallelPrefixOMP<test_t, op> block_omp(input, par_min);
+  spm::block::parallelPrefixSTL<test_t, op> block_stl(input, par_min);
+
+  // Circuit based
+  // spm::circuit::parallelPrefixCilk<test_t, op> circuit_cilk(input, par_min);
+  spm::circuit::parallelPrefixFF<test_t, op> circuit_ff(input, par_min);
+  spm::circuit::parallelPrefixOMP<test_t, op> circuit_omp(input, par_min);
+  spm::circuit::parallelPrefixSTL<test_t, op> circuit_stl(input, par_min);
+
+  // TEST
+  std::cout << "Sequential..." << std::endl;
+  seq_stl.start(output_seq);
+  std::cout << output_seq[output_seq.size()-1] << std::endl;
+  //std::cout << output_seq;
+
+  std::cout << "Parallel ff..." << std::endl;
+  output_par.assign(output_par.size(), 0);
+  block_ff.start(output_par);
+  std::cout << "Check " << ((output_seq != output_par) ? "false": "true") << std::endl;
+  std::cout << output_par[output_par.size()-1] << std::endl;
+  //std::cout << output_par;
+
+  std::cout << "Parallel omp..." << std::endl;
+  output_par.assign(output_par.size(), 0);
+  block_omp.start(output_par);
+  std::cout << "Check " << ((output_seq != output_par) ? "false": "true") << std::endl;
+  std::cout << output_par[output_par.size()-1] << std::endl;
+  //std::cout << output_par;
+
+  std::cout << "Parallel stl..." << std::endl;
+  output_par.assign(output_par.size(), 0);
+  block_stl.start(output_par);
+  std::cout << "Check " << ((output_seq != output_par) ? "false": "true") << std::endl;
+  std::cout << output_par[output_par.size()-1] << std::endl;
+  //std::cout << output_par;
+
+  std::cout << "Circuit ff..." << std::endl;
+  output_par.assign(output_par.size(), 0);
+  circuit_ff.start(output_par);
+  std::cout << "Check " << ((output_seq != output_par) ? "false": "true") << std::endl;
+  std::cout << output_par[output_par.size()-1] << std::endl;
+  //std::cout << output_par;
+
+  std::cout << "Circuit omp..." << std::endl;
+  output_par.assign(output_par.size(), 0);
+  circuit_omp.start(output_par);
+  std::cout << "Check " << ((output_seq != output_par) ? "false": "true") << std::endl;
+  std::cout << output_par[output_par.size()-1] << std::endl;
+  //std::cout << output_par;
+
+  std::cout << "Circuit stl..." << std::endl;
+  output_par.assign(output_par.size(), 0);
+  circuit_stl.start(output_par);
+  std::cout << "Check " << ((output_seq != output_par) ? "false": "true") << std::endl;
+  std::cout << output_par[output_par.size()-1] << std::endl;
+  //std::cout << output_par;
 
   // For each k
-  for(unsigned int k = k_max; k >= k_min; --k)
+  for(unsigned int m = m_max; m >= m_min; --m)
   {
     // For each parDeg
     for(unsigned int p=par_min; p<=par_max; p=(f_par_lin?(p+1):(p*2)))

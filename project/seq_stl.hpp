@@ -54,7 +54,6 @@ namespace spm
 
         void start(std::vector<T>& output)
         {
-
           // assert(in.size() == out.size())
 
           int N = static_cast<int>(input->size());

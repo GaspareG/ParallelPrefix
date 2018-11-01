@@ -85,7 +85,7 @@ namespace spm
           for(int k=1; k<=spm::circuit::k1(1, m); k++)
           {
             auto [l, r] = spm::circuit::g1(1, k);
-            output[l] = (*input[l]);
+            output[l] = (*input)[l];
             output[r] = op((*input)[l], (*input)[r]);
           }
 

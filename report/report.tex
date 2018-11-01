@@ -7,6 +7,7 @@
 \usepackage[overload]{empheq}
 \usepackage[font=small,labelfont=bf]{caption}
 \usepackage{subcaption}
+\usepackage{hyperref}
  % Required for specifying captions to tables and figures
 
 \newcommand{\for}{\text{for }}
@@ -154,15 +155,15 @@ The completion time of the sequential algorithm is simply $T^{s}_C = (n-1) \time
 
 The parallel completion time of the block-based algorithm is the sum of the completion times of all of the three phases:
 
-\begin{equation}
+\begin{equation*}
   T^{b}_{C_p} \geq T_{1_p} + T_{2_p} + T_{3_p}
-\end{equation} 
+\end{equation*} 
 
 Where:
 
 \begin{itemize}
   \item $T_{1_p} = (n/p) \times t_{\oplus}$ is the time to compute the prefix sums of a single block (as all the $p$ blocks are performed in parallel).
-  \item $T_{2_p} = (p) \times t_{\oplus}$ is the time to compute the prefix sums over the temporary vector.
+  \item $T_{2_p} = p \times t_{\oplus}$ is the time to compute the prefix sums over the temporary vector.
   \item $T_{3_p} = (n/p) \times t_{\oplus}$ (or $0$ if $p = 1$) is the time to add a value to a single block (except the first one).
 \end{itemize}
 
@@ -175,9 +176,9 @@ In this analysis we assume that $n$ is a multiple of $p$ and all the blocks have
 \subsection{Circuit-based algorithm}
 
 In the prefix circuit $P(n)$ we have a total of $2m-1$ tasks that must be executed sequentially. 
-As said before all the operations in the same task can be performed in parallel at the same time, so a generic task $T_i$ has a completion time of $t_{\oplus}$.
+As said before all the operations in the same task can be performed in parallel at the same time, so a generic task $T_i$ has a completion time of $1 \times t_{\oplus}$.
 
-So the completion time of the circuit based algorithm is $T^{c}_{C_p} \geq 2\log_{2}(n) - 1$.
+So the completion time of the algorithm is $T^{c}_{C_p} \geq (2\log_{2}(n) - 1) \times t_{\oplus}$.
 
 \smallskip
 
@@ -185,9 +186,11 @@ However this analysis works only if the parallelism degree is high enough to all
 
 \smallskip
 
-When this is not the case a task $T_i$ is perfomed in $\max(1, |T_i|/p) \times t_\oplus$ time and it can be demonstrated that $T^{c}_{C_p} \geq 2(\log_2{p} + n/p) \times t_{\oplus}$.
+When this is not the case a task $T_i$ is perfomed in $\max(1, |T_i|/p) \times t_\oplus$ time and the completion time is circa $T^{c}_{C_p} \simeq 2(\log_2{p} + n/p) \times t_{\oplus}$.
 
 \subsection{Comparison table}
+
+Now we can compare the completion time of all the algorithms:
 
 \begin{table}[h]
 \centering
@@ -195,29 +198,35 @@ When this is not the case a task $T_i$ is perfomed in $\max(1, |T_i|/p) \times t
 \hline
  $p$ & $T^s_{C}$                & $T^b_{C_p}$                   & $T^c_{C_p}$ \\ \hline
   1  & $(n-1)\times t_{\oplus}$ & $n \times t_{\oplus}$         & $2n \times t_{\oplus}$\\ \hline
-  2  & $(n-1)\times t_{\oplus}$ & $n \times t_{\oplus}$         & $(n+1) \times t_{\oplus}$ \\ \hline
-  4  & $(n-1)\times t_{\oplus}$ & $(n/2 + 4) \times t_{\oplus}$ & $(n/4+2) \times t_{\oplus}$ \\ \hline
-  8  & $(n-1)\times t_{\oplus}$ & $(n/4 + 8) \times t_{\oplus}$ & $(n/4+2) \times t_{\oplus}$ \\ \hline
+  2  & $(n-1)\times t_{\oplus}$ & $n \times t_{\oplus}$         & $(n+2) \times t_{\oplus}$ \\ \hline
+  4  & $(n-1)\times t_{\oplus}$ & $(n/2 + 4) \times t_{\oplus}$ & $(n/2+4) \times t_{\oplus}$ \\ \hline
+  8  & $(n-1)\times t_{\oplus}$ & $(n/4 + 8) \times t_{\oplus}$ & $(n/4+3) \times t_{\oplus}$ \\ \hline
  ... & ...                      & ...                           & ... \\ \hline
- n/2 & $(n-1)\times t_{\oplus}$ & $(n/2+1)\times t_{\oplus}$    & $ \times t_{\oplus}$ \\ \hline
-  n  & $(n-1)\times t_{\oplus}$ & $(n+2)\times t_{\oplus}$      & $\log \times t_{\oplus}$ \\ \hline
+ n/2 & $(n-1)\times t_{\oplus}$ & $(n/2+1)\times t_{\oplus}$    & $2(\log_{2}(n) + 1) \times t_{\oplus}$ \\ \hline
+  n  & $(n-1)\times t_{\oplus}$ & $(n+2)\times t_{\oplus}$      & $2(\log_{2}(n) + 1) \times t_{\oplus}$ \\ \hline
 \end{tabular}
-\caption{Comparison of the three algorithms with different parallelism degree}
+\caption{Comparison of the three algorithms with different parallelism degrees}
 \end{table}
 
-What we can see from the table is that 
+What we can see from the table is that until $p = 2$ the improvement is negligible, but when the parallelism degree increase the parallel algorithms .
+
+The circuit-based algorithm reach its best performance for $p \geq n/2$ where each task is computed in $1 \times t_{\oplus}$. 
+The block-based algorithm scale as well as the circuit-based, but when the parallelism degree increase we have a lack of performance due the trade-off between the parallel part of the first and the third stage ($2n/p \times t_{\oplus}$) and the second stage that must be performed sequentially ($p \times t_{\oplus}$).
+
+%induced for the second phase of the algorithm as it does a serial computation of $p \times t_{\oplus}$.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Implementations structure and details}
 
-All the implementations are written in $C++17$, the source code is available as attachment with the report or on GitHub
+All the implementations are written in C++17, the source code is available as attachment with the report or on \href{https://github.com/GaspareG/ParallelPrefix}{GitHub}.
 
- (https://github.com/GaspareG/ParallelPrefix).
+Both of the parallel algorithms have been implemented using the standard C++ threads, the FastFlow framework and the OpenMP/Cilk Plus API. All the algorithms are designed to avoid race conditions between the operations in the same phase, so there is no need for any special synchronization mechanism except for the barriers at the end of each phase to pass to the next one.
 
+Each different implementation is available as single class in a single \textit{.hpp} file. All the classes provide the methods to change the parallelism degree, to start the computation and to get the times of each phases of the last computation.
 
 \subsection{Sequential algorithm}
 
-The sequential implementations 
+The sequential implementations is simply an iteration over the input vector likely the implementation of the \textit{std::partial\_sum} function.
 
 \subsection{Block-based algorithm}
 
