@@ -2,6 +2,12 @@
 \usepackage{blindtext}
 \usepackage{authblk}
 \usepackage[utf8]{inputenc}
+\usepackage{amsmath, amssymb}
+\usepackage{amssymb}
+\usepackage[overload]{empheq}
+\usepackage[font=small,labelfont=bf]{caption} % Required for specifying captions to tables and figures
+
+\newcommand{\for}{\text{for }}
  
 \title{SPM project: Parallel Prefix}
 \author{Gaspare Ferraro, 520549}
@@ -20,64 +26,110 @@ In this report we will analyze, theoretically and practically, the resolution of
 
 \medskip
 
-Given an input vector $\langle x_{0}, x_{1}, \ldots, x_{n-1} \rangle$ and a binary operation $\oplus$ compute the output vector $\langle x_{0}, x_{0} \oplus x_{1}, x_{0} \oplus x_{1} \oplus x_{2}, \ldots, x_{0} \oplus x_{1} \oplus \ldots \oplus x_{n-1} \rangle$. % , i.e. each element of the output vector at position $i$ is the results of 
+\textit{Given a vector $x = \langle x_{0}, x_{1}, \ldots, x_{n-1} \rangle$ and a binary operation $\oplus$ compute the vector $y = \langle x_{0}, x_{0} \oplus x_{1}, x_{0} \oplus x_{1} \oplus x_{2}, \ldots, x_{0} \oplus x_{1} \oplus \ldots \oplus x_{n-1} \rangle$.} % , i.e. each element of the output vector at position $i$ is the results of 
 
 \medskip
+
+In literature this operation is also called (inclusive) scan or partial sum.
 
 For the analysis of the problem we have to make two assumptions:
 
 \begin{itemize}
   \item The binary operation $\oplus$ is associative ($ a \oplus ( b \oplus c ) =  (a \oplus b) \oplus c  $) and commutative ($a \oplus b = b \oplus a$), this is an important assumption as we will see in the next chapters the order of the operations may not be preserved.
-  \item The size of the input vector is a power of $2$, not a strong assumptions, as all the algorithms we will present could be easily generalize to all the sizes, but it helps to simplify some operations.
+  \item The size of the input vector is a power of $2$, not a strong assumption, as all the algorithms we will present could be easily generalize to all the sizes, but it only helps to simplify some operations.
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Sequential algorithm}
 
-The sequential algorithm compute 
+The sequential algorithm simple compute each element of the vector $y$ as follow:
 
-The algorithm is optimal in a sequential model as it has a running time of $\mathcal{O}(n)$ and perform $n-1$ calls to $\oplus$ operation.
+\begin{equation*}[]
+    y_{i} =
+    \begin{cases}
+      x_{0}& \for i = 0 \\
+      x_{i} \oplus y_{i-1},& \for 0 <  i < n
+    \end{cases}
+\end{equation*}
+
+This algorithm is optimal in a sequential model as it has a running time of $\mathcal{O}(n)$, assuming that $\oplus$ is $\mathcal{O}(1)$, and performs $n-1$ calls to $\oplus$ operation.
  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Parallel architecture design}
 
+The problem of computing the prefix sum vector is a classical example of a problem that have an optimal solution in a sequential model but that can be optimized in a parallel model. 
+The optimization is not in terms of total complexity or in the number of $\oplus$ operations performed (which are already optimals in the sequential algorithm) but in terms of completion time. When the number of available threads is more than one we can trade-off more total work for less completion time.
+\medskip
+
+We will now introduce two different algorithms that solve in an efficient way the prefix sum problem in a parallel model. 
+
 \subsection{Block-based algorithm}
+
+The idea behind the first algorithm is to partitionate the input vector in blocks, compute the prefix vector of each block in parallel .
+
+\begin{itemize}
+  \item Partitionate the input vector in blocks and compute in parallel the prefix vector of each of them.
+  \item second phase
+  \item third phase
+\end{itemize}
+
+\begin{center}
+\begin{minipage}{0.75\linewidth}
+\includegraphics[width=\linewidth]{img/block}
+\captionof{figure}{Block-based algorithm graphic representation} 
+\end{minipage}
+\end{center}
+
+%\begin{equation*}
+%  x^{1} = \langle x_0, x_1, \ldots, x_{n/2-1} \rangle \rightarrow y^{1} = \langle x_0, x_0 \oplus x_1, \ldots, x_0 \oplus x_1 \oplus \ldots \oplus x_{n/2-1} \rangle 
+%\end{equation*}
+%\begin{equation*}
+%  x^{2} = \langle x_{n/2}, x_{n/2+1}, \ldots, x_{n-1} \rangle \rightarrow y^{1} = \langle x_{n/2}, x_{n/2} \oplus x_{n/2+1} \ldots, x_0 \oplus x_1 \oplus \ldots \oplus x_{n/2} \rangle 
+%\end{equation*}
 
 \subsection{Circuit-based algorithm}
 
+Another kind of algorithms are the one based on a circuit-like rappresentation, 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Performance modeling}
+
+ 
+\subsection{Block-based algorithm}
+
+
+\subsection{Circuit-based algorithm}
+
  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Implementations structure and details}
 
-All the implementations are written in $C++17$, the source code is available as attachment with the report \href{https://github.com/GaspareG/ParallelPrefix}{https://github.com/GaspareG/ParallelPrefix}.
+All the implementations are written in $C++17$, the source code is available as attachment with the report or on GitHub (https://github.com/GaspareG/ParallelPrefix).
+
 
 \subsection{Sequential algorithm}
 
-The sequential implementations
+The sequential implementations 
 
 \subsection{Block-based algorithm}
 
+TODO
+
 \subsection{Circuit-based algorithm}
+
+TODO
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Experimental validation}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce nulla enim, pretium vitae purus ut, tincidunt vehicula eros. Duis eleifend facilisis lacus, tempor dapibus erat posuere ac. Praesent maximus molestie eros, non mollis ex aliquet at. Quisque non magna nisi. Nulla elementum ultrices nunc a mollis. Sed turpis quam, elementum a scelerisque vitae, sollicitudin at enim. Nulla varius ex lectus, in finibus dolor malesuada vulputate. Nam fringilla, tellus vel dapibus viverra, ligula orci congue quam, eget consectetur eros nisl at sem. Fusce dignissim faucibus lectus ut venenatis. Nam convallis non turpis vitae tempor. Nunc eget faucibus turpis, a vestibulum elit. Proin tempus nibh laoreet, sollicitudin elit eu, condimentum purus.
 
 \subsection{experiments details}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce nulla enim, pretium vitae purus ut, tincidunt vehicula eros. Duis eleifend facilisis lacus, tempor dapibus erat posuere ac. Praesent maximus molestie eros, non mollis ex aliquet at. Quisque non magna nisi. Nulla elementum ultrices nunc a mollis. Sed turpis quam, elementum a scelerisque vitae, sollicitudin at enim. Nulla varius ex lectus, in finibus dolor malesuada vulputate. Nam fringilla, tellus vel dapibus viverra, ligula orci congue quam, eget consectetur eros nisl at sem. Fusce dignissim faucibus lectus ut venenatis. Nam convallis non turpis vitae tempor. Nunc eget faucibus turpis, a vestibulum elit. Proin tempus nibh laoreet, sollicitudin elit eu, condimentum purus.
-
 \subsection{benchmark results}
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce nulla enim, pretium vitae purus ut, tincidunt vehicula eros. Duis eleifend facilisis lacus, tempor dapibus erat posuere ac. Praesent maximus molestie eros, non mollis ex aliquet at. Quisque non magna nisi. Nulla elementum ultrices nunc a mollis. Sed turpis quam, elementum a scelerisque vitae, sollicitudin at enim. Nulla varius ex lectus, in finibus dolor malesuada vulputate. Nam fringilla, tellus vel dapibus viverra, ligula orci congue quam, eget consectetur eros nisl at sem. Fusce dignissim faucibus lectus ut venenatis. Nam convallis non turpis vitae tempor. Nunc eget faucibus turpis, a vestibulum elit. Proin tempus nibh laoreet, sollicitudin elit eu, condimentum purus.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce nulla enim, pretium vitae purus ut, tincidunt vehicula eros. Duis eleifend facilisis lacus, tempor dapibus erat posuere ac. Praesent maximus molestie eros, non mollis ex aliquet at. Quisque non magna nisi. Nulla elementum ultrices nunc a mollis. Sed turpis quam, elementum a scelerisque vitae, sollicitudin at enim. Nulla varius ex lectus, in finibus dolor malesuada vulputate. Nam fringilla, tellus vel dapibus viverra, ligula orci congue quam, eget consectetur eros nisl at sem. Fusce dignissim faucibus lectus ut venenatis. Nam convallis non turpis vitae tempor. Nunc eget faucibus turpis, a vestibulum elit. Proin tempus nibh laoreet, sollicitudin elit eu, condimentum purus.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \end{document}
