@@ -5,7 +5,9 @@
 \usepackage{amsmath, amssymb}
 \usepackage{amssymb}
 \usepackage[overload]{empheq}
-\usepackage[font=small,labelfont=bf]{caption} % Required for specifying captions to tables and figures
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{subcaption}
+ % Required for specifying captions to tables and figures
 
 \newcommand{\for}{\text{for }}
  
@@ -65,13 +67,15 @@ We will now introduce two different algorithms that solve in an efficient way th
 
 \subsection{Block-based algorithm}
 
-The idea behind the first algorithm is to partitionate the input vector in blocks, compute the prefix vector of each block in parallel .
+The idea behind the first parallel algorithm is to compute the prefix vector in three phases:
 
 \begin{itemize}
   \item Partitionate the input vector in blocks and compute in parallel the prefix vector of each of them.
-  \item second phase
-  \item third phase
+  \item In the second phase we put the final element of each block in a temporary vector and compute its prefix vector.
+  \item Finally for each block $i$ (except for the first one) add in parallel the $(i-1)$th element of the temporary vector.
 \end{itemize}
+
+At the end of the three phases the final vector contains the correct prefix .
 
 \begin{center}
 \begin{minipage}{0.75\linewidth}
@@ -80,16 +84,41 @@ The idea behind the first algorithm is to partitionate the input vector in block
 \end{minipage}
 \end{center}
 
-%\begin{equation*}
-%  x^{1} = \langle x_0, x_1, \ldots, x_{n/2-1} \rangle \rightarrow y^{1} = \langle x_0, x_0 \oplus x_1, \ldots, x_0 \oplus x_1 \oplus \ldots \oplus x_{n/2-1} \rangle 
-%\end{equation*}
-%\begin{equation*}
-%  x^{2} = \langle x_{n/2}, x_{n/2+1}, \ldots, x_{n-1} \rangle \rightarrow y^{1} = \langle x_{n/2}, x_{n/2} \oplus x_{n/2+1} \ldots, x_0 \oplus x_1 \oplus \ldots \oplus x_{n/2} \rangle 
-%\end{equation*}
-
 \subsection{Circuit-based algorithm}
 
-Another kind of algorithms are the one based on a circuit-like rappresentation, 
+Another kind of algorithms are the one based on a circuit-like representation, 
+
+A generic prefix circuit $C$ is a collections of sets 
+
+For example the serial algorithm seen before can be represented as a prefix circuit $S(n) = \{ G_{0}, G_{1}, \ldots, G_{n-1} \}$ where $G_{i} = \{ (i, i+1) \}$.
+
+We present now the simple (but still efficient) prefix circuit $P(2^m)$:
+
+\begin{equation*}
+  
+\end{equation*}
+
+In the first phase (from $t = 1$ to $t = m$) we compute operations like
+
+In the second phase (from $t = m+1$ to $t = 2m -1$) we compute the final value of 
+
+\begin{figure}[h]
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.9\linewidth]{img/circuit-serial}
+  \caption{Prefix circuit $S(8)$}
+  \label{fig:sub1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.9\linewidth]{img/circuit-parallel}
+  \caption{Prefix circuit $P(8)$}
+  \label{fig:sub2}
+\end{subfigure}
+\caption{Examples of prefix circuits}
+\label{fig:test}
+\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Performance modeling}
@@ -100,11 +129,13 @@ Another kind of algorithms are the one based on a circuit-like rappresentation,
 
 \subsection{Circuit-based algorithm}
 
- 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Implementations structure and details}
 
-All the implementations are written in $C++17$, the source code is available as attachment with the report or on GitHub (https://github.com/GaspareG/ParallelPrefix).
+All the implementations are written in $C++17$, the source code is available as attachment with the report or on GitHub
+
+ (https://github.com/GaspareG/ParallelPrefix).
 
 
 \subsection{Sequential algorithm}
