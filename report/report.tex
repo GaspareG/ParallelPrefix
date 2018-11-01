@@ -34,6 +34,8 @@ In this report we will analyze, theoretically and practically, the resolution of
 
 In literature this operation is also called (inclusive) scan or partial sum.
 
+\medskip
+
 For the analysis of the problem we have to make two assumptions:
 
 \begin{itemize}
@@ -60,7 +62,7 @@ This algorithm is optimal in a sequential model as it has a running time of $\ma
 \section{Parallel architecture design}
 
 The problem of computing the prefix sum vector is a classical example of a problem that have an optimal solution in a sequential model but that can be optimized in a parallel model. 
-The optimization is not in terms of total complexity or in the number of $\oplus$ operations performed (which are already optimals in the sequential algorithm) but in terms of completion time. When the number of available threads is more than one we can trade-off more total work for less completion time.
+The optimization is not in terms of total complexity or in the number of $\oplus$ operations performed (which are already optimals in the sequential algorithm) but in terms of completion time. When the number of available workers is more than one we can trade-off more total work for less completion time.
 \medskip
 
 We will now introduce two different algorithms that solve in an efficient way the prefix sum problem in a parallel model. 
@@ -75,10 +77,10 @@ The idea behind the first parallel algorithm is to compute the prefix vector in 
   \item Finally for each block $i$ (except for the first one) add in parallel the $(i-1)$th element of the temporary vector.
 \end{itemize}
 
-At the end of the three phases the final vector contains the correct prefix .
+At the end of the three phases the final vector contains the correct prefixes.
 
 \begin{center}
-\begin{minipage}{0.75\linewidth}
+\begin{minipage}{0.65\linewidth}
 \includegraphics[width=\linewidth]{img/block}
 \captionof{figure}{Block-based algorithm graphic representation} 
 \end{minipage}
@@ -86,21 +88,32 @@ At the end of the three phases the final vector contains the correct prefix .
 
 \subsection{Circuit-based algorithm}
 
-Another kind of algorithms are the one based on a circuit-like representation, 
+Another class of algorithms are the one based on a circuit-like representation. A generic prefix circuit $C$ is a collection of tasks $T_1, T_2, \ldots, T_t,$ . 
+A task $T_i$ is a set of operations $(l, r)$ that means to compute $x_r = x_r \oplus x_l$. The tasks must be computed sequentially from $1$ to $t$ but the advantage is that all the operations in a same task can be performed in parallel without race conditions.
 
-A generic prefix circuit $C$ is a collections of sets 
+\medskip
 
-For example the serial algorithm seen before can be represented as a prefix circuit $S(n) = \{ G_{0}, G_{1}, \ldots, G_{n-1} \}$ where $G_{i} = \{ (i, i+1) \}$.
+For example the sequential algorithm seen before can be represented as a prefix circuit $S(n) = \{ T_{1}, T_{2}, \ldots, T_{n-1} \}$ where $T_{i} = \{ (i-1, i) \}$.
+
+\medskip
 
 We present now the simple (but still efficient) prefix circuit $P(2^m)$:
 
 \begin{equation*}
-  
+  P(2^m) = \{ T_1, T_2, \ldots, T_m, T_{m+1}, \ldots, T_{2m-1} \}  
+\end{equation*}
+where $\text{for}\ i = 1, \ldots, m$:
+\begin{equation*}
+  T_i = \{ (2k^i - 2^{i-1}-1, 2k^i-1 )\ |\ k = 1, \ldots, 2^{m-i} \}
+\end{equation*}
+and $\text{for}\ i = 1, \ldots, m-1$:
+\begin{equation*}
+  T_{m+i} = \{ (k2^{m-i}-1, k2^{m-i}+2^{m-i-1}-1 )\ |\ k = 1, \ldots, 2^{i}-1 \}\
 \end{equation*}
 
-In the first phase (from $t = 1$ to $t = m$) we compute operations like
+\medskip
 
-In the second phase (from $t = m+1$ to $t = 2m -1$) we compute the final value of 
+In the first phase (from $1$ to $m$) we compute operations like in a reduction tree, in the second phase (from $m+1$ to $2m -1$) we compute the final value of each prefix as the sum of only two others values.
 
 \begin{figure}[h]
 \centering
@@ -120,15 +133,79 @@ In the second phase (from $t = m+1$ to $t = 2m -1$) we compute the final value o
 \label{fig:test}
 \end{figure}
 
+As we can see in these simple examples, for $n = 8$ the sequential algorithm needs $7$ units of time against the only $5$ of the parallel algorithm (obviously if the number of workers is at least $4$). 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Performance modeling}
 
- 
+For the theoretical performance modeling we will denote with:
+
+\begin{itemize}
+  \item $n = 2^m$ the size of the input vector ($m = \log_2{n}$).
+  \item $p$ the parallelism degree (for simplicity $p \leq n$).
+  \item $t_{\oplus}$ is the time to compute a single $\oplus$ operation.
+\end{itemize} 
+
+\subsection{Sequential algorithm}
+
+The completion time of the sequential algorithm is simply $T^{s}_C = (n-1) \times t_{\oplus}$. 
+
 \subsection{Block-based algorithm}
 
+The parallel completion time of the block-based algorithm is the sum of the completion times of all of the three phases:
+
+\begin{equation}
+  T^{b}_{C_p} \geq T_{1_p} + T_{2_p} + T_{3_p}
+\end{equation} 
+
+Where:
+
+\begin{itemize}
+  \item $T_{1_p} = (n/p) \times t_{\oplus}$ is the time to compute the prefix sums of a single block (as all the $p$ blocks are performed in parallel).
+  \item $T_{2_p} = (p) \times t_{\oplus}$ is the time to compute the prefix sums over the temporary vector.
+  \item $T_{3_p} = (n/p) \times t_{\oplus}$ (or $0$ if $p = 1$) is the time to add a value to a single block (except the first one).
+\end{itemize}
+
+So the total completion time is $T^{b}_{C_p} \geq (2n/p + p) \times t_{\oplus}$.
+
+\smallskip
+
+In this analysis we assume that $n$ is a multiple of $p$ and all the blocks have the same size, if this is not the case we can consider the block size as the size of the biggest block.
 
 \subsection{Circuit-based algorithm}
 
+In the prefix circuit $P(n)$ we have a total of $2m-1$ tasks that must be executed sequentially. 
+As said before all the operations in the same task can be performed in parallel at the same time, so a generic task $T_i$ has a completion time of $t_{\oplus}$.
+
+So the completion time of the circuit based algorithm is $T^{c}_{C_p} \geq 2\log_{2}(n) - 1$.
+
+\smallskip
+
+However this analysis works only if the parallelism degree is high enough to allow to performs all the operations in $T_i$ at the same time ($p \geq n/2$).
+
+\smallskip
+
+When this is not the case a task $T_i$ is perfomed in $\max(1, |T_i|/p) \times t_\oplus$ time and it can be demonstrated that $T^{c}_{C_p} \geq 2(\log_2{p} + n/p) \times t_{\oplus}$.
+
+\subsection{Comparison table}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|r|r|r|}
+\hline
+ $p$ & $T^s_{C}$                & $T^b_{C_p}$                   & $T^c_{C_p}$ \\ \hline
+  1  & $(n-1)\times t_{\oplus}$ & $n \times t_{\oplus}$         & $2n \times t_{\oplus}$\\ \hline
+  2  & $(n-1)\times t_{\oplus}$ & $n \times t_{\oplus}$         & $(n+1) \times t_{\oplus}$ \\ \hline
+  4  & $(n-1)\times t_{\oplus}$ & $(n/2 + 4) \times t_{\oplus}$ & $(n/4+2) \times t_{\oplus}$ \\ \hline
+  8  & $(n-1)\times t_{\oplus}$ & $(n/4 + 8) \times t_{\oplus}$ & $(n/4+2) \times t_{\oplus}$ \\ \hline
+ ... & ...                      & ...                           & ... \\ \hline
+ n/2 & $(n-1)\times t_{\oplus}$ & $(n/2+1)\times t_{\oplus}$    & $ \times t_{\oplus}$ \\ \hline
+  n  & $(n-1)\times t_{\oplus}$ & $(n+2)\times t_{\oplus}$      & $\log \times t_{\oplus}$ \\ \hline
+\end{tabular}
+\caption{Comparison of the three algorithms with different parallelism degree}
+\end{table}
+
+What we can see from the table is that 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Implementations structure and details}
