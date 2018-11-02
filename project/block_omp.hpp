@@ -133,6 +133,13 @@ namespace spm
           return last_test;
         }
 
+	spm::timer::ms_t getLastTime()
+        {
+          spm::timer::ms_t out = 0;
+          for(auto t : last_test) out += t;
+          return out;
+        }
+
     };
   }
 }

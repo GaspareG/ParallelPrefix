@@ -4,6 +4,7 @@
 #include <vector>
 #include <numeric>
 #include <utility>
+#include <map>
 #include <random>
 #include "utils/clock.hpp"
 #include "utils/cxxopts.hpp"
@@ -15,13 +16,19 @@
 #include "block_stl.hpp"
 #include "block_omp.hpp"
 #include "block_ff.hpp"
-// #include "block_cilk.hpp"
+
+#ifdef cilk_for
+  #include "block_cilk.hpp"
+#endif
 
 // Circuit algorithm implemenation
 #include "circuit_stl.hpp"
 #include "circuit_omp.hpp"
 #include "circuit_ff.hpp"
-// #include "circuit_cilk.hpp"
+
+#ifdef cilk_for
+  #include "circuit_cilk.hpp"
+#endif
 
 // Vector size define
 #define M_MIN_DEFAULT 26
@@ -201,6 +208,13 @@ int main(int argc, char**argv)
     return 1;
   }
 
+  // check experiments
+  if(experiments == 0)
+  {
+    std::cout << "Error in number of experiments (check experiments option)" << std::endl;
+    return 1;
+  }
+
   // Create dataset
   auto input = std::make_shared<std::vector<test_t>>(1<<m_max, 0);
   std::vector<test_t> output_seq(1<<m_max, 0);
@@ -230,74 +244,170 @@ int main(int argc, char**argv)
   spm::sequential::sequentialPrefixSTL<test_t, op> seq_stl(input);
 
   // Block-based
-  // spm::block::parallelPrefixCilk<test_t, op> block_cilk(input, par_min);
+  #ifdef cilk_for
+  spm::block::parallelPrefixCilk<test_t, op> block_cilk(input, par_min);
+  #endif
   spm::block::parallelPrefixFF<test_t, op> block_ff(input, par_min);
   spm::block::parallelPrefixOMP<test_t, op> block_omp(input, par_min);
   spm::block::parallelPrefixSTL<test_t, op> block_stl(input, par_min);
 
   // Circuit based
-  // spm::circuit::parallelPrefixCilk<test_t, op> circuit_cilk(input, par_min);
-  spm::circuit::parallelPrefixFF<test_t, op> circuit_ff(input, par_min);
-  spm::circuit::parallelPrefixOMP<test_t, op> circuit_omp(input, par_min);
-  spm::circuit::parallelPrefixSTL<test_t, op> circuit_stl(input, par_min);
+  #ifdef cilk_for
+  spm::circuit::parallelPrefixCilk<test_t, op> circ_cilk(input, par_min);
+  #endif
+  spm::circuit::parallelPrefixFF<test_t, op> circ_ff(input, par_min);
+  spm::circuit::parallelPrefixOMP<test_t, op> circ_omp(input, par_min);
+  spm::circuit::parallelPrefixSTL<test_t, op> circ_stl(input, par_min);
 
-  // TEST
-  std::cout << "Sequential..." << std::endl;
-  seq_stl.start(output_seq);
-  std::cout << output_seq[output_seq.size()-1] << std::endl;
-  //std::cout << output_seq;
-
-  std::cout << "Parallel ff..." << std::endl;
-  output_par.assign(output_par.size(), 0);
-  block_ff.start(output_par);
-  std::cout << "Check " << ((output_seq != output_par) ? "false": "true") << std::endl;
-  std::cout << output_par[output_par.size()-1] << std::endl;
-  //std::cout << output_par;
-
-  std::cout << "Parallel omp..." << std::endl;
-  output_par.assign(output_par.size(), 0);
-  block_omp.start(output_par);
-  std::cout << "Check " << ((output_seq != output_par) ? "false": "true") << std::endl;
-  std::cout << output_par[output_par.size()-1] << std::endl;
-  //std::cout << output_par;
-
-  std::cout << "Parallel stl..." << std::endl;
-  output_par.assign(output_par.size(), 0);
-  block_stl.start(output_par);
-  std::cout << "Check " << ((output_seq != output_par) ? "false": "true") << std::endl;
-  std::cout << output_par[output_par.size()-1] << std::endl;
-  //std::cout << output_par;
-
-  std::cout << "Circuit ff..." << std::endl;
-  output_par.assign(output_par.size(), 0);
-  circuit_ff.start(output_par);
-  std::cout << "Check " << ((output_seq != output_par) ? "false": "true") << std::endl;
-  std::cout << output_par[output_par.size()-1] << std::endl;
-  //std::cout << output_par;
-
-  std::cout << "Circuit omp..." << std::endl;
-  output_par.assign(output_par.size(), 0);
-  circuit_omp.start(output_par);
-  std::cout << "Check " << ((output_seq != output_par) ? "false": "true") << std::endl;
-  std::cout << output_par[output_par.size()-1] << std::endl;
-  //std::cout << output_par;
-
-  std::cout << "Circuit stl..." << std::endl;
-  output_par.assign(output_par.size(), 0);
-  circuit_stl.start(output_par);
-  std::cout << "Check " << ((output_seq != output_par) ? "false": "true") << std::endl;
-  std::cout << output_par[output_par.size()-1] << std::endl;
-  //std::cout << output_par;
+  // Results storage
+  std::map<std::tuple<std::string, unsigned int, unsigned int>, spm::timer::ms_t> res_times;
 
   // For each k
   for(unsigned int m = m_max; m >= m_min; --m)
   {
+    std::cout << "m = " << m << " | n = " << (1<<m) << std::endl;
+
+    (*input).resize(1<<m);
+    output_seq.resize(1<<m);
+    output_par.resize(1<<m);
+
+    // Compute sequentially
+    if(f_seq)
+    {
+      for(unsigned int i=0; i<experiments; i++)
+      {
+        output_seq.assign(output_seq.size(), 0);
+        seq_stl.start(output_seq);
+        res_times[{"seq_stl", m, 1}] += seq_stl.getLastTime(); 
+      }
+    }
+
     // For each parDeg
     for(unsigned int p=par_min; p<=par_max; p=(f_par_lin?(p+1):(p*2)))
     {
-      // TEST
+      std::cout << "\tp = " << p << std::endl;
+      // For each experiment
+      for(unsigned int i=0; i<experiments; i++)
+      {
+
+        // Test block_st
+        if(f_stl_block)
+        {
+          output_par.assign(output_par.size(), 0);
+          block_stl.start(output_par);
+          res_times[{"block_stl", m, p}] += block_stl.getLastTime();
+          if(f_check && output_seq != output_par)
+          {
+            std::cout << "ERROR IN BLOCK_STL!" << std::endl;
+            return -1;
+          }
+        }
+
+        // Test block_st
+        if(f_ff_block)
+        {
+          output_par.assign(output_par.size(), 0);
+          block_ff.start(output_par);
+          res_times[{"block_ff", m, p}] += block_ff.getLastTime();
+          if(f_check && output_seq != output_par)
+          {
+            std::cout << "ERROR IN BLOCK_FF!" << std::endl;
+            return -1;
+          }
+        }
+
+        // Test block_st
+        if(f_omp_block)
+        {
+          output_par.assign(output_par.size(), 0);
+          block_omp.start(output_par);
+          res_times[{"block_omp", m, p}] += block_omp.getLastTime();
+          if(f_check && output_seq != output_par)
+          {
+            std::cout << "ERROR IN BLOCK_STL!" << std::endl;
+            return -1;
+          }
+        }
+
+        // Test block_st
+        #ifdef cilk_for
+        if(f_cilk_block)
+        {
+          output_par.assign(output_par.size(), 0);
+          block_stl.start(output_par);
+          res_times[{"block_cilk", m, p}] += block_cilk.getLastTime();
+          if(f_check && output_seq != output_par)
+          {
+            std::cout << "ERROR IN BLOCK_CILK!" << std::endl;
+            return -1;
+          }
+        }
+        #endif
+
+        // Test circ_st
+        if(f_stl_circ)
+        {
+          output_par.assign(output_par.size(), 0);
+          circ_stl.start(output_par);
+          res_times[{"circ_stl", m, p}] += circ_stl.getLastTime();
+          if(f_check && output_seq != output_par)
+          {
+            std::cout << "ERROR IN CIRC_STL!" << std::endl;
+            return -1;
+          }
+        }
+        // Test circ_st
+        if(f_ff_circ)
+        {
+          output_par.assign(output_par.size(), 0);
+          circ_ff.start(output_par);
+          res_times[{"circ_ff", m, p}] += circ_ff.getLastTime();
+          if(f_check && output_seq != output_par)
+          {
+            std::cout << "ERROR IN CIRC_FF!" << std::endl;
+            return -1;
+          }
+        }
+
+        // Test circ_st
+        if(f_omp_circ)
+        {
+          output_par.assign(output_par.size(), 0);
+          circ_omp.start(output_par);
+          res_times[{"circ_omp", m, p}] += circ_omp.getLastTime();
+          if(f_check && output_seq != output_par)
+          {
+            std::cout << "ERROR IN CIRC_STL!" << std::endl;
+            return -1;
+          }
+        }
+
+        // Test circ_st
+        #ifdef cilk_for
+        if(f_cilk_circ)
+        {
+          output_par.assign(output_par.size(), 0);
+          circ_stl.start(output_par);
+          res_times[{"circ_cilk", m, p}] += circ_cilk.getLastTime();
+          if(f_check && output_seq != output_par)
+          {
+            std::cout << "ERROR IN CIRC_CILK!" << std::endl;
+            return -1;
+          }
+        }
+        #endif
+      }
     }
   }
 
-  return 0;
+  std::cout << "Results..." << std::endl;
+
+  for(auto [k, t] : res_times)
+  {
+    auto [s, m, p] = k;
+    t /= experiments;
+    std::cout << s << " " << m << " " << p << " " << t << std::endl;
+  }
+
+ return 0;
 }
