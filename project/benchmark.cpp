@@ -31,8 +31,8 @@
 #endif
 
 // Vector size define
-#define M_MIN_DEFAULT 26
-#define M_MAX_DEFAULT 30
+#define M_MIN_DEFAULT 25
+#define M_MAX_DEFAULT 28
 
 #define M_MIN 1
 #define M_MAX 30
@@ -66,7 +66,7 @@ int main(int argc, char**argv)
 
   // Options default value
   bool f_help = false;
-  bool f_verbose = false;
+  // bool f_verbose = false;
   bool f_complete = false;
 
   // Algorithm flags
@@ -103,7 +103,7 @@ int main(int argc, char**argv)
   options.add_options()
     // Options
     (      "h,help", "Print help",                                     cxxopts::value(f_help))
-    (   "v,verbose", "Verbose log to std::cerr (defaut: false)",       cxxopts::value(f_verbose))
+    // (   "v,verbose", "Verbose log to std::cerr (defaut: false)",       cxxopts::value(f_verbose))
     (  "c,complete", "Execute smart benchmark (default: false)",       cxxopts::value(f_complete))
 
     // Algorithms to benchmark
@@ -131,8 +131,8 @@ int main(int argc, char**argv)
     (        "seed", "Seed for random number generator (default 42)",  cxxopts::value(seed))
 
     // Algorithms parameters
-    (       "m-min", "Min log2 of vector size (default: 26)",          cxxopts::value(m_min))
-    (       "m-max", "Max log2 of vector size (default: 30)",          cxxopts::value(m_max));
+    (       "m-min", "Min log2 of vector size (default: 25)",          cxxopts::value(m_min))
+    (       "m-max", "Max log2 of vector size (default: 28)",          cxxopts::value(m_max));
 
   // Parse arguments
   auto result = options.parse(argc, argv);
@@ -286,6 +286,18 @@ int main(int argc, char**argv)
     for(unsigned int p=par_min; p<=par_max; p=(f_par_lin?(p+1):(p*2)))
     {
       std::cout << "\tp = " << p << std::endl;
+
+      block_stl.setParallelismDegree(p);
+      block_ff.setParallelismDegree(p);
+      block_omp.setParallelismDegree(p);
+      circ_stl.setParallelismDegree(p);
+      circ_ff.setParallelismDegree(p);
+      circ_omp.setParallelismDegree(p);
+      #ifdef cilk_for
+      circ_cilk.setParallelismDegree(p);
+      block_cilk.setParallelismDegree(p);
+      #endif
+
       // For each experiment
       for(unsigned int i=0; i<experiments; i++)
       {

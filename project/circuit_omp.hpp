@@ -116,7 +116,7 @@ namespace spm
           auto step3 = spm::timer::step(start_time);
           /*******************************************************************/
 
-          step3 = step2 - step2;
+          step3 = step3 - step2;
           step2 = step2 - step1;
 
           last_test = {step1, step2, step3};
@@ -127,7 +127,7 @@ namespace spm
           return last_test;
         }
 
-	spm::timer::ms_t getLastTime()
+        spm::timer::ms_t getLastTime()
         {
           spm::timer::ms_t out = 0;
           for(auto t : last_test) out += t;
