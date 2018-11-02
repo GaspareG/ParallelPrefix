@@ -222,7 +222,16 @@ All the implementations are written in C++17, the source code is available as at
 
 Both of the parallel algorithms have been implemented using the standard C++ threads, the FastFlow framework and the OpenMP/Cilk Plus API. All the algorithms are designed to avoid race conditions between the operations in the same phase, so there is no need for any special synchronization mechanism except for the barriers at the end of each phase to pass to the next one.
 
-Each different implementation is available as single class in a single \textit{.hpp} file. All the classes provide the methods to change the parallelism degree, to start the computation and to get the times of each phases of the last computation.
+Each different implementation is available as single class in a single \textit{.hpp} file. All the classes provide the methods to change the parallelism degree, to start the computation and to get time statistics of last computation.
+
+\smallskip
+
+Among with the implementions the project include a benchmark suite that provide different features for the tests: select which algorithm execute, select the range of input size, select the range for the parallelism degree and many other options.
+
+\smallskip
+
+To compile the project is enough to run the \textit{compile.sh} script inside the project folder.
+If needed a short help is available for consultation, just run \textit{./benchmark -h}.
 
 \subsection{Sequential algorithm}
 
@@ -239,14 +248,29 @@ TODO
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Experimental validation}
 
+The experiments were executed on a CPU \textit{Xeon Phi KNC} with $64$ physical core, each of them with a four-way multithreading support (for a total of $256$ threads).
+
+\begin{itemize}
+  \item Each running time is expressed in milliseconds and it is an average of $5$ repeated test.
+  \item Each implemented algorithm was tested with $p \in \{1, 2, 4, 8, 16, 32, 64, 128\}$.
+  \item Each implemented algorithm was tested with $n \in \{2^{20}, 2^{21}, \ldots, 2^{28}, 2^{29}\}$.
+\end{itemize}
+
+TODO
+
 
 \subsection{experiments details}
 
+TODO
+
 \subsection{benchmark results}
+
+TODO
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
 
+TODO
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \end{document}

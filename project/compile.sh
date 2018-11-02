@@ -5,7 +5,7 @@ rm "bin/benchmark"
 
 echo "Compiling..."
 export FF_ROOT=$(pwd)
-time g++ -O3 -Ofast -Wall -Wextra -pedantic -std=c++17 -fconcepts -lpthread -lm -fopenmp -march=native -I$FF_ROOT -o ./bin/benchmark benchmark.cpp
+time g++ -O3 -Ofast -Wall -Wextra -pedantic -std=c++17 -fconcepts -lpthread -lm -fopenmp -march=native -fcilkplus -lcilkrts -I$FF_ROOT -o ./bin/benchmark benchmark.cpp
 
 code=$?
 

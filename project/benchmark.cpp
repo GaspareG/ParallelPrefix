@@ -1,3 +1,14 @@
+/*
+        filename: benchmark.cpp
+          author: Gaspare Ferraro <ferraro@gaspa.re>
+  student number: 520549
+          degree: MD in CS: Data and Knowledge Science and Technologies
+            exam: Parallel and Distributed Systems: Paradigms and Models
+
+     description: Benchmark suite for the SPM project
+
+*/
+
 #include <string>
 #include <thread>
 #include <algorithm>
