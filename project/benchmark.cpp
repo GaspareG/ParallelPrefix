@@ -278,7 +278,7 @@ int main(int argc, char**argv)
       {
         output_seq.assign(output_seq.size(), 0);
         seq_stl.start(output_seq);
-        res_times[{"seq_stl", m, 1}] += seq_stl.getLastTime(); 
+        res_times[{"seq_stl", m, 1}] += seq_stl.getLastTime();
       }
     }
 
@@ -399,7 +399,7 @@ int main(int argc, char**argv)
         if(f_cilk_circ)
         {
           output_par.assign(output_par.size(), 0);
-          circ_stl.start(output_par);
+          circ_cilk.start(output_par);
           res_times[{"circ_cilk", m, p}] += circ_cilk.getLastTime();
           if(f_check && output_seq != output_par)
           {
