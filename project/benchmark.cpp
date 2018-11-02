@@ -41,7 +41,7 @@
 
 // vector type and lambda operation
 using test_t = unsigned long long int;
-auto op = [](test_t a, test_t b) -> test_t
+test_t op(test_t a, test_t b)
 {
   return a+b;
 };
