@@ -387,7 +387,7 @@ int main(int argc, char**argv)
         if(f_cilk_block)
         {
           output_par.assign(output_par.size(), 0);
-          block_stl.start(output_par);
+          block_cilk.start(output_par);
           res_times[{"block_cilk", m, p}] += block_cilk.getLastTime();
           if(f_check && output_seq != output_par)
           {
