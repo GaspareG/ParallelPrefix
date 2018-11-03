@@ -48,98 +48,117 @@ namespace spm
 {
   namespace block
   {
-    template<class T, T op(T,T)> class parallelPrefixSTL
+    template<class T, T op(T, T)>
+    class parallelPrefixSTL
     {
 
-      private:
+    private:
 
-        std::shared_ptr<std::vector<T>> input;
-        std::array<spm::timer::ms_t, 3> last_test = {0, 0, 0};
-        unsigned int parDeg;
+      std::shared_ptr <std::vector<T>> input;
+      std::array<spm::timer::ms_t, 3> last_test = {0, 0, 0};
+      unsigned int parDeg;
 
-      public:
+    public:
 
-        parallelPrefixSTL(std::shared_ptr<std::vector<T>> const in, unsigned int np) : input(in), parDeg(np) {}
+      parallelPrefixSTL(std::shared_ptr <std::vector<T>> const in, unsigned int np) : input(in), parDeg(np)
+      {}
 
-        void setParallelismDegree(unsigned int np)
+      void setParallelismDegree(unsigned int np)
+      {
+        parDeg = np;
+      }
+
+      void start(std::vector <T> &output)
+      {
+
+        // assert(in.size() == out.size())
+
+        // Create range
+        unsigned int N = static_cast<unsigned int>(input->size());
+        spm::range_t ranges(N, parDeg);
+
+        auto start_time = spm::timer::start();
+
+        /*******************************************************************/
+        // First phase
+
+        // Given a range i compute prefix sum over block i
+        auto block_prefix = [&](const unsigned int i)
         {
-          parDeg = np;
+          auto[a, b] = ranges(i);
+          output[a] = (*input)[a];
+          for (++a; a < b; ++a) output[a] = op((*input)[a], output[a - 1]);
+        };
+
+        // For each block spawn a thread
+        std::vector <std::thread> threads_prefix;
+
+        for (unsigned int i = 0; i < ranges.blocks(); ++i)
+          threads_prefix.emplace_back(block_prefix, i);
+
+        // Join all created threads
+        for (auto &t : threads_prefix)
+          t.join();
+
+        auto step1 = spm::timer::step(start_time);
+
+        // Second phase
+        /*******************************************************************/
+
+        // Compute prefix sum over the end of each block
+        std::vector <T> block_sum(ranges.blocks());
+        block_sum[0] = output[std::get<1>(ranges(0)) - 1];
+
+        for (unsigned int i = 1; i < ranges.blocks(); ++i)
+        {
+          T el = output[std::get<1>(ranges(i)) - 1];
+          block_sum[i] = op(block_sum[i - 1], el);
         }
 
-        void start(std::vector<T>& output)
+        auto step2 = spm::timer::step(start_time);
+
+        /*******************************************************************/
+        // Third phase
+
+        // Given a range i ( > 0 ) add block_sum[i-1] over all block i
+        auto block_add = [&](const unsigned int i)
         {
+          auto[a, b] = ranges(i);
+          for (; a < b; ++a)
+            output[a] = op(output[a], block_sum[i - 1]);
+        };
 
-          // assert(in.size() == out.size())
+        // For each block spawn a thread
+        std::vector <std::thread> threads_sum;
 
-          unsigned int N = static_cast<unsigned int>(input->size());
+        for (unsigned int i = 1; i < ranges.blocks(); ++i)
+          threads_sum.emplace_back(block_add, i);
 
-   	  spm::range_t ranges(N, parDeg);
+        // Join all created threads
+        for (auto &t : threads_sum)
+          t.join();
 
-          auto start_time = spm::timer::start();
+        auto step3 = spm::timer::step(start_time);
+        /*******************************************************************/
 
-          /*******************************************************************/
-          auto block_prefix = [&](const unsigned int i)
-          {
-            auto [a, b] = ranges(i);
-      	    output[a] = (*input)[a];
-      	    for(++a; a<b; ++a) output[a] = op((*input)[a], output[a-1]);
-          };
+        // Update last time statistic
+        step3 = step3 - step2;
+        step2 = step2 - step1;
+        last_test = {step1, step2, step3};
 
-          std::vector<std::thread> threads_prefix;
+      }
 
-          for(unsigned int i=0; i<ranges.blocks(); ++i)
-            threads_prefix.emplace_back(block_prefix, i);
+      std::array<spm::timer::ms_t, 3> getLastTest()
+      {
+        return last_test;
+      }
 
-          for(auto &t : threads_prefix)
-            t.join();
-
-          auto step1 = spm::timer::step(start_time);
-          /*******************************************************************/
-          std::vector<T> block_sum(ranges.blocks());
-          block_sum[0] = output[std::get<1>(ranges(0))-1];
-
-          for(unsigned int i=1; i<ranges.blocks(); ++i)
-          {
-            T el = output[std::get<1>(ranges(i))-1];
-            block_sum[i] = op(block_sum[i-1], el);
-          }
-
-          auto step2 = spm::timer::step(start_time);
-          /*******************************************************************/
-          auto block_add = [&](const unsigned int i)
-          {
-            auto [a, b] = ranges(i);
-            for(; a<b; ++a)
-              output[a] = op(output[a], block_sum[i-1]);
-          };
-
-          std::vector<std::thread> threads_sum;
-
-          for(unsigned int i=1; i<ranges.blocks(); ++i)
-            threads_sum.emplace_back(block_add, i);
-          for(auto &t : threads_sum)
-            t.join();
-
-          auto step3 = spm::timer::step(start_time);
-          /*******************************************************************/
-
-          step3 = step3-step2;
-          step2 = step2-step1;
-
-          last_test = {step1, step2, step3};
-        }
-
-        std::array<spm::timer::ms_t, 3> getLastTest()
-        {
-          return last_test;
-        }
-
-        spm::timer::ms_t getLastTime()
-        {
-          spm::timer::ms_t out = 0;
-          for(auto t : last_test) out += t;
-          return out;
-        }
+      spm::timer::ms_t getLastTime()
+      {
+        spm::timer::ms_t out = 0;
+        for (auto t : last_test) out += t;
+        return out;
+      }
 
     };
   }

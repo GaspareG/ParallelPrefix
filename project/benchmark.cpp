@@ -1,11 +1,39 @@
 /*
-        filename: benchmark.cpp
-          author: Gaspare Ferraro <ferraro@gaspa.re>
-  student number: 520549
-          degree: MD in CS: Data and Knowledge Science and Technologies
-            exam: Parallel and Distributed Systems: Paradigms and Models
+       filename: benchmark.cpp
+         author: Gaspare Ferraro <ferraro@gaspa.re>
+ student number: 520549
+         degree: MD in CS: Data and Knowledge Science and Technologies
+           exam: Parallel and Distributed Systems: Paradigms and Models
 
-     description: Benchmark suite for the SPM project
+    description: Benchmark suite for the SPM project
+
+          Usage:
+            benchmark [OPTION...]
+
+            -h, --help         Print help
+            -c, --complete     Execute smart benchmark (default: false)
+                --stl-seq      Test STL sequential implementation
+                --stl-block    Test STL block implementation
+                --stl-circ     Test STL circuit implementation
+                --ff-block     Test FF block implementation
+                --ff-pipe      Test FF pipeline block implementation
+                --ff-circ      Test FF circuit implementation
+                --omp-block    Test OMP block implementation
+                --omp-circ     Test OMP circuit implementation
+                --cilk-block   Test CILK block implementation
+                --cilk-circ    Test CILK circuit implementation
+                --all-block    Test all block implementations
+                --all-circuit  Test all circuit implementations
+                --all          Test all implementations
+                --exp arg      N° of experiments to run (default: 1)
+                --par-min arg  Minimum parallelism degree (default: 1)
+                --par-max arg  Maximum parallelism degree (default: max)
+                --par-lin      Linear step in par degree (default: false)
+                --check        Check for errors (default: false)
+                --dataset arg  Input dataset (default 0: rnd, 1: 1s, 2: incr)
+                --seed arg     Seed for random number generator (default 42)
+                --m-min arg    Min log2 of vector size (default: 25)
+                --m-max arg    Max log2 of vector size (default: 28)
 
 */
 
@@ -45,8 +73,8 @@
 #define M_MIN_DEFAULT 25
 #define M_MAX_DEFAULT 28
 
-#define M_MIN 1
-#define M_MAX 30
+#define M_MIN 10
+#define M_MAX 29
 
 #define MAX_V 1024
 
@@ -119,15 +147,15 @@ int main(int argc, char**argv)
 
     // Algorithms to benchmark
     (     "stl-seq", "Test STL sequential implementation ",            cxxopts::value(f_seq))
-    (   "stl-block", "Test STL block implementation ",                 cxxopts::value(f_stl_block))
-    (    "stl-circ", "Test STL circuit implementation ",               cxxopts::value(f_stl_circ))
-    (    "ff-block", "Test FF block implementation ",                  cxxopts::value(f_ff_block))
-    (     "ff-pipe", "Test FF pipeline block implementation ",         cxxopts::value(f_ff_pipe))
-    (     "ff-circ", "Test FF circuit implementation ",                cxxopts::value(f_ff_circ))
-    (   "omp-block", "Test OMP block implementation ",                 cxxopts::value(f_omp_block))
-    (    "omp-circ", "Test OMP circuit implementation ",               cxxopts::value(f_omp_circ))
-    (  "cilk-block", "Test CILK block implementation ",                cxxopts::value(f_cilk_block))
-    (   "cilk-circ", "Test CILK circuit implementation ",              cxxopts::value(f_cilk_circ))
+    (   "stl-block", "Test STL block implementation",                  cxxopts::value(f_stl_block))
+    (    "stl-circ", "Test STL circuit implementation",                cxxopts::value(f_stl_circ))
+    (    "ff-block", "Test FF block implementation",                   cxxopts::value(f_ff_block))
+    (     "ff-pipe", "Test FF pipeline block implementation",          cxxopts::value(f_ff_pipe))
+    (     "ff-circ", "Test FF circuit implementation",                 cxxopts::value(f_ff_circ))
+    (   "omp-block", "Test OMP block implementation",                  cxxopts::value(f_omp_block))
+    (    "omp-circ", "Test OMP circuit implementation",                cxxopts::value(f_omp_circ))
+    (  "cilk-block", "Test CILK block implementation",                 cxxopts::value(f_cilk_block))
+    (   "cilk-circ", "Test CILK circuit implementation",               cxxopts::value(f_cilk_circ))
     (   "all-block", "Test all block implementations",                 cxxopts::value(f_all_block))
     ( "all-circuit", "Test all circuit implementations",               cxxopts::value(f_all_circ))
     (         "all", "Test all implementations",                       cxxopts::value(f_all))

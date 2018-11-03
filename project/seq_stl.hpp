@@ -57,9 +57,11 @@ namespace spm
           // assert(in.size() == out.size())
 
           int N = static_cast<int>(input->size());
+
           auto start_time = spm::timer::start();
           /*******************************************************************/
           output[0] = (*input)[0];
+
           for(int i=1; i<N; i++)
             output[i] = op(output[i-1], (*input)[i]);
 
