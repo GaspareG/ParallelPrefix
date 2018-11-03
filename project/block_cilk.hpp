@@ -126,7 +126,7 @@ namespace spm
 
         // Cilk_for execute one call to block_prefix per thread
         #pragma cilk grainsize = 1
-        cilk_for (unsigned int i = 0; i < ranges.blocks(); ++i)
+        cilk_for (unsigned int i = 1; i < ranges.blocks(); ++i)
         {
           block_add(i);
         }

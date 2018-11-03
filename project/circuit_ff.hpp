@@ -48,87 +48,103 @@ namespace spm
 {
   namespace circuit
   {
-    template<class T, T op(T,T)> class parallelPrefixFF
+    template<class T, T op(T, T)>
+    class parallelPrefixFF
     {
 
-      private:
+    private:
 
-        std::shared_ptr<std::vector<T>> input;
-        std::array<spm::timer::ms_t, 3> last_test;
-        unsigned int parDeg;
+      std::shared_ptr <std::vector<T>> input;
+      std::array<spm::timer::ms_t, 3> last_test;
+      unsigned int parDeg;
 
-      public:
+    public:
 
-        parallelPrefixFF(std::shared_ptr<std::vector<T>> const& in, unsigned int np) : input(in), parDeg(np) {}
+      parallelPrefixFF(std::shared_ptr <std::vector<T>> const &in, unsigned int np) : input(in), parDeg(np)
+      {}
 
-        void setParallelismDegree(unsigned int np)
+      void setParallelismDegree(unsigned int np)
+      {
+        parDeg = np;
+      }
+
+      void start(std::vector <T> &output)
+      {
+
+        // assert(in.size() == out.size())
+
+        int n = static_cast<int>(input->size());
+        int m = 1; // m = log2(n);
+
+        while ((1 << m) < n) m++;
+
+        // assert((1<<m) == n);
+
+        auto start_time = spm::timer::start();
+
+        // FastFlow parallel for
+        ff::ParallelFor pf(parDeg);
+
+        /*******************************************************************/
+        // First phase
+
+        // In the first task we need also to copy all the value from input to output
+        // Then in second and third phase we can work in place
+        pf.parallel_for(1, spm::circuit::k1(1, m) + 1, [&](const long int k)
         {
-          parDeg = np;
-        }
+          auto[l, r] = spm::circuit::g1(1, k);
+          output[l] = (*input)[l];
+          output[r] = op((*input)[l], (*input)[r]);
+        });
 
-        void start(std::vector<T>& output)
+        auto step1 = spm::timer::step(start_time);
+
+        /*******************************************************************/
+        // Second phase
+
+        for (int t = 2; t <= m; t++)
         {
-
-          // assert(in.size() == out.size())
-
-          int n = static_cast<int>(input->size());
-          int m = 1; // m = log2(n);
-
-          while((1<<m) < n) m++;
-
-          // assert((1<<m) == n);
-
-          auto start_time = spm::timer::start();
-
-          ff::ParallelFor pf(parDeg);
-
-          /*******************************************************************/
-          pf.parallel_for(1, spm::circuit::k1(1, m)+1, [&](const long int k){
-            auto [l, r] = spm::circuit::g1(1, k);
-            output[l] = (*input)[l];
-            output[r] = op((*input)[l], (*input)[r]);
+          pf.parallel_for(1, spm::circuit::k1(t, m) + 1, [&](const long int k)
+          {
+            auto[l, r] = spm::circuit::g1(t, k);
+            output[r] = op(output[l], output[r]);
           });
-
-          auto step1 = spm::timer::step(start_time);
-          /*******************************************************************/
-          for(int t=2; t<=m; t++)
-          {
-            pf.parallel_for(1, spm::circuit::k1(t, m)+1, [&](const long int k){
-              auto [l, r] = spm::circuit::g1(t, k);
-              output[r] = op(output[l], output[r]);
-            });
-          }
-
-          auto step2 = spm::timer::step(start_time);
-          /*******************************************************************/
-          for(int t=1; t<m; t++)
-          {
-            pf.parallel_for(1, spm::circuit::k2(t)+1, [&](const long int k){
-              auto [l, r] = spm::circuit::g2(t, k, m);
-              output[r] = op(output[l], output[r]);
-            });
-          }
-
-          auto step3 = spm::timer::step(start_time);
-          /*******************************************************************/
-
-          step3 = step3 - step2;
-          step2 = step2 - step1;
-
-          last_test = {step1, step2, step3};
         }
 
-        std::array<spm::timer::ms_t, 3> getLastTest()
+        auto step2 = spm::timer::step(start_time);
+
+        /*******************************************************************/
+        // Third phase
+
+        for (int t = 1; t < m; t++)
         {
-          return last_test;
+          pf.parallel_for(1, spm::circuit::k2(t) + 1, [&](const long int k)
+          {
+            auto[l, r] = spm::circuit::g2(t, k, m);
+            output[r] = op(output[l], output[r]);
+          });
         }
 
-        spm::timer::ms_t getLastTime()
-        {
-          spm::timer::ms_t out = 0;
-          for(auto t : last_test) out += t;
-          return out;
-        }
+        auto step3 = spm::timer::step(start_time);
+        /*******************************************************************/
+
+        // Update last time statistic
+        step3 = step3 - step2;
+        step2 = step2 - step1;
+        last_test = {step1, step2, step3};
+      }
+
+      std::array<spm::timer::ms_t, 3> getLastTest()
+      {
+        return last_test;
+      }
+
+      spm::timer::ms_t getLastTime()
+      {
+        spm::timer::ms_t out = 0;
+        for (auto t : last_test) out += t;
+        return out;
+      }
 
     };
   }

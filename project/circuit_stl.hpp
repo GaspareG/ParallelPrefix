@@ -48,142 +48,155 @@ namespace spm
 {
   namespace circuit
   {
-    template<class T, T op(T,T)> class parallelPrefixSTL
+    template<class T, T op(T, T)>
+    class parallelPrefixSTL
     {
 
-      private:
+    private:
 
-        std::shared_ptr<std::vector<T>> input;
-        std::array<spm::timer::ms_t, 3> last_test;
-        unsigned int parDeg;
+      std::shared_ptr <std::vector<T>> input;
+      std::array<spm::timer::ms_t, 3> last_test;
+      unsigned int parDeg;
 
-      public:
+    public:
 
-        parallelPrefixSTL(std::shared_ptr<std::vector<T>> const& in, unsigned int np) : input(in), parDeg(np) {}
+      parallelPrefixSTL(std::shared_ptr <std::vector<T>> const &in, unsigned int np) : input(in), parDeg(np)
+      {}
 
-        void setParallelismDegree(unsigned int np)
+      void setParallelismDegree(unsigned int np)
+      {
+        parDeg = np;
+      }
+
+      void start(std::vector <T> &output)
+      {
+
+        // assert(in.size() == out.size())
+
+        int n = static_cast<int>(input->size());
+        int m = 1; // m = log2(n);
+
+        while ((1 << m) < n) m++;
+
+        // assert((1<<m) == n);
+
+        auto start_time = spm::timer::start();
+
+        /*******************************************************************/
+        // First phase
+
+        spm::range_t ranges_p1(spm::circuit::k1(1, m), parDeg);
+
+        auto circuit_f1 = [&](const unsigned int i)
         {
-          parDeg = np;
-        }
-
-        void start(std::vector<T>& output)
-        {
-
-          // assert(in.size() == out.size())
-
-          int n = static_cast<int>(input->size());
-          int m = 1; // m = log2(n);
-
-          while((1<<m) < n) m++;
-
-          // assert((1<<m) == n);
-
-          auto start_time = spm::timer::start();
-
-          /*******************************************************************/
-          spm::range_t ranges_p1(spm::circuit::k1(1, m), parDeg);
-
-          auto circuit_f1 = [&](const unsigned int i)
+          auto[a, b] = ranges_p1(i);
+          a++;
+          b++;
+          for (a; a < b; a++)
           {
-            auto [a, b] = ranges_p1(i);
-            a++;
-            b++;
-            for(a; a<b; a++)
-            {
-              auto [l, r] = spm::circuit::g1(1, a);
-              output[l] = (*input)[l];
-              output[r] = op((*input)[l], (*input)[r]);
-            }
-          };
+            auto[l, r] = spm::circuit::g1(1, a);
+            output[l] = (*input)[l];
+            output[r] = op((*input)[l], (*input)[r]);
+          }
+        };
 
-          std::vector<std::thread> threads_p1;
+        // Spawn a thread for each block
+        std::vector <std::thread> threads_p1;
 
-          for(unsigned int i=0; i<ranges_p1.blocks(); ++i)
-            threads_p1.emplace_back(circuit_f1, i);
+        for (unsigned int i = 0; i < ranges_p1.blocks(); ++i)
+          threads_p1.emplace_back(circuit_f1, i);
 
-          for(auto &t : threads_p1)
+        // Join all the threads created
+        for (auto &t : threads_p1)
+          t.join();
+
+        auto step1 = spm::timer::step(start_time);
+
+        /*******************************************************************/
+        // Second phase
+
+        std::vector <std::thread> threads_p2;
+        spm::range_t ranges_p2(spm::circuit::k1(2, m), parDeg);
+
+        auto circuit_f2 = [&](const unsigned int i, const int t)
+        {
+          auto[a, b] = ranges_p2(i);
+          a++;
+          b++;
+          for (int k = a; k < b; k++)
+          {
+            auto[l, r] = spm::circuit::g1(t, k);
+            output[r] = op(output[l], output[r]);
+          }
+        };
+
+        for (int t = 2; t <= m; t++)
+        {
+          ranges_p2 = spm::range_t(spm::circuit::k1(t, m), parDeg);
+
+          for (unsigned int i = 0; i < ranges_p2.blocks(); ++i)
+            threads_p2.emplace_back(circuit_f2, i, t);
+
+          for (auto &t : threads_p2)
             t.join();
 
-          auto step1 = spm::timer::step(start_time);
-          /*******************************************************************/
-          std::vector<std::thread> threads_p2;
-          spm::range_t ranges_p2(spm::circuit::k1(2, m), parDeg);
-
-          auto circuit_f2 = [&](const unsigned int i, const int t)
-          {
-            auto [a, b] = ranges_p2(i);
-            a++;
-            b++;
-            for(int k=a; k<b; k++)
-            {
-              auto [l, r] = spm::circuit::g1(t, k);
-              output[r] = op(output[l], output[r]);
-            }
-          };
-
-          for(int t=2; t<=m; t++)
-          {
-            ranges_p2 = spm::range_t(spm::circuit::k1(t, m), parDeg);
-
-            for(unsigned int i=0; i<ranges_p2.blocks(); ++i)
-              threads_p2.emplace_back(circuit_f2, i, t);
-
-            for(auto &t : threads_p2)
-              t.join();
-
-            threads_p2.clear();
-          }
-
-          auto step2 = spm::timer::step(start_time);
-          /*******************************************************************/
-          std::vector<std::thread> threads_p3;
-          spm::range_t ranges_p3(spm::circuit::k2(1), parDeg);
-
-          auto circuit_f3 = [&](const unsigned int i, const int t, const int m)
-          {
-            auto [a, b] = ranges_p3(i);
-            a++;
-            b++;
-            for(int k=a; k<b; k++)
-            {
-              auto [l, r] = spm::circuit::g2(t, k, m);
-              output[r] = op(output[l], output[r]);
-            }
-          };
-
-          for(int t=1; t<m; t++)
-          {
-            ranges_p3 = spm::range_t(spm::circuit::k2(t), parDeg);
-
-            for(unsigned int i=0; i<ranges_p3.blocks(); ++i)
-              threads_p3.emplace_back(circuit_f3, i, t, m);
-
-            for(auto &t : threads_p3)
-              t.join();
-
-            threads_p3.clear();
-          }
-
-          auto step3 = spm::timer::step(start_time);
-          /*******************************************************************/
-
-          step3 = step3 - step2;
-          step2 = step2 - step1;
-
-          last_test = {step1, step2, step3};
+          threads_p2.clear();
         }
 
-        std::array<spm::timer::ms_t, 3> getLastTest()
+        auto step2 = spm::timer::step(start_time);
+
+        /*******************************************************************/
+        // Third phase
+
+        std::vector <std::thread> threads_p3;
+        spm::range_t ranges_p3(spm::circuit::k2(1), parDeg);
+
+        auto circuit_f3 = [&](const unsigned int i, const int t, const int m)
         {
-          return last_test;
+          auto[a, b] = ranges_p3(i);
+          a++;
+          b++;
+          for (int k = a; k < b; k++)
+          {
+            auto[l, r] = spm::circuit::g2(t, k, m);
+            output[r] = op(output[l], output[r]);
+          }
+        };
+
+        for (int t = 1; t < m; t++)
+        {
+          ranges_p3 = spm::range_t(spm::circuit::k2(t), parDeg);
+
+          for (unsigned int i = 0; i < ranges_p3.blocks(); ++i)
+            threads_p3.emplace_back(circuit_f3, i, t, m);
+
+          for (auto &t : threads_p3)
+            t.join();
+
+          threads_p3.clear();
         }
 
-        spm::timer::ms_t getLastTime()
-        {
-          spm::timer::ms_t out = 0;
-          for(auto t : last_test) out += t;
-          return out;
-        }
+        auto step3 = spm::timer::step(start_time);
+
+        /*******************************************************************/
+
+        // Update last time statistic
+        step3 = step3 - step2;
+        step2 = step2 - step1;
+        last_test = {step1, step2, step3};
+      }
+
+      std::array<spm::timer::ms_t, 3> getLastTest()
+      {
+        return last_test;
+      }
+
+      spm::timer::ms_t getLastTime()
+      {
+        spm::timer::ms_t out = 0;
+        for (auto t : last_test) out += t;
+        return out;
+      }
 
     };
   }

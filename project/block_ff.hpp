@@ -78,6 +78,7 @@ namespace spm
 
         auto start_time = spm::timer::start();
 
+	// FastFlow parallel for 
         ff::ParallelFor pf(parDeg);
 
         /*******************************************************************/
