@@ -56,6 +56,8 @@
 #include "block_omp.hpp"
 #include "block_ff.hpp"
 
+#define cilk_for
+
 #ifdef cilk_for
   #include "block_cilk.hpp"
 #endif
