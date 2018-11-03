@@ -1,457 +1,651 @@
-alg,m,p,t
-block_cilk 20 1 0
-block_cilk 20 2 0
-block_cilk 20 4 0
-block_cilk 20 8 0
-block_cilk 20 16 0
-block_cilk 20 32 0
-block_cilk 20 64 0
-block_cilk 20 128 0
-block_cilk 21 1 0
-block_cilk 21 2 0
-block_cilk 21 4 0
-block_cilk 21 8 0
-block_cilk 21 16 0
-block_cilk 21 32 0
-block_cilk 21 64 0
-block_cilk 21 128 0
-block_cilk 22 1 0
-block_cilk 22 2 0
-block_cilk 22 4 0
-block_cilk 22 8 0
-block_cilk 22 16 0
-block_cilk 22 32 0
-block_cilk 22 64 0
-block_cilk 22 128 0
-block_cilk 23 1 0
-block_cilk 23 2 0
-block_cilk 23 4 0
-block_cilk 23 8 0
-block_cilk 23 16 0
-block_cilk 23 32 0
-block_cilk 23 64 0
-block_cilk 23 128 0
-block_cilk 24 1 0
-block_cilk 24 2 0
-block_cilk 24 4 0
-block_cilk 24 8 0
-block_cilk 24 16 0
-block_cilk 24 32 0
-block_cilk 24 64 0
-block_cilk 24 128 0
-block_ff 20 1 72
-block_ff 20 2 73
-block_ff 20 4 53
-block_ff 20 8 55
-block_ff 20 16 70
-block_ff 20 32 67
-block_ff 20 64 76
-block_ff 20 128 81
-block_ff 21 1 59
-block_ff 21 2 59
-block_ff 21 4 83
-block_ff 21 8 61
-block_ff 21 16 67
-block_ff 21 32 74
-block_ff 21 64 85
-block_ff 21 128 103
-block_ff 22 1 65
-block_ff 22 2 64
-block_ff 22 4 58
-block_ff 22 8 83
-block_ff 22 16 57
-block_ff 22 32 73
-block_ff 22 64 70
-block_ff 22 128 92
-block_ff 23 1 77
-block_ff 23 2 77
-block_ff 23 4 64
-block_ff 23 8 59
-block_ff 23 16 71
-block_ff 23 32 69
-block_ff 23 64 84
-block_ff 23 128 92
-block_ff 24 1 114
-block_ff 24 2 134
-block_ff 24 4 84
-block_ff 24 8 65
-block_ff 24 16 74
-block_ff 24 32 71
-block_ff 24 64 74
-block_ff 24 128 85
-block_omp 20 1 3
-block_omp 20 2 3
-block_omp 20 4 1
-block_omp 20 8 1
-block_omp 20 16 0
-block_omp 20 32 2
-block_omp 20 64 6
-block_omp 20 128 20
-block_omp 21 1 6
-block_omp 21 2 6
-block_omp 21 4 3
-block_omp 21 8 2
-block_omp 21 16 1
-block_omp 21 32 1
-block_omp 21 64 5
-block_omp 21 128 4
-block_omp 22 1 11
-block_omp 22 2 13
-block_omp 22 4 6
-block_omp 22 8 4
-block_omp 22 16 3
-block_omp 22 32 4
-block_omp 22 64 3
-block_omp 22 128 9
-block_omp 23 1 23
-block_omp 23 2 17
-block_omp 23 4 12
-block_omp 23 8 11
-block_omp 23 16 6
-block_omp 23 32 5
-block_omp 23 64 4
-block_omp 23 128 9
-block_omp 24 1 46
-block_omp 24 2 34
-block_omp 24 4 24
-block_omp 24 8 15
-block_omp 24 16 13
-block_omp 24 32 8
-block_omp 24 64 5
-block_omp 24 128 6
-block_stl 20 1 3
-block_stl 20 2 2
-block_stl 20 4 2
-block_stl 20 8 2
-block_stl 20 16 3
-block_stl 20 32 7
-block_stl 20 64 15
-block_stl 20 128 33
-block_stl 21 1 6
-block_stl 21 2 5
-block_stl 21 4 3
-block_stl 21 8 3
-block_stl 21 16 4
-block_stl 21 32 9
-block_stl 21 64 18
-block_stl 21 128 33
-block_stl 22 1 12
-block_stl 22 2 9
-block_stl 22 4 5
-block_stl 22 8 5
-block_stl 22 16 6
-block_stl 22 32 11
-block_stl 22 64 21
-block_stl 22 128 37
-block_stl 23 1 23
-block_stl 23 2 17
-block_stl 23 4 10
-block_stl 23 8 9
-block_stl 23 16 7
-block_stl 23 32 13
-block_stl 23 64 26
-block_stl 23 128 45
-block_stl 24 1 46
-block_stl 24 2 34
-block_stl 24 4 22
-block_stl 24 8 15
-block_stl 24 16 10
-block_stl 24 32 15
-block_stl 24 64 28
-block_stl 24 128 49
-circ_cilk 20 1 10
-circ_cilk 20 2 15
-circ_cilk 20 4 11
-circ_cilk 20 8 16
-circ_cilk 20 16 11
-circ_cilk 20 32 14
-circ_cilk 20 64 12
-circ_cilk 20 128 14
-circ_cilk 21 1 15
-circ_cilk 21 2 21
-circ_cilk 21 4 18
-circ_cilk 21 8 24
-circ_cilk 21 16 14
-circ_cilk 21 32 20
-circ_cilk 21 64 16
-circ_cilk 21 128 22
-circ_cilk 22 1 16
-circ_cilk 22 2 18
-circ_cilk 22 4 16
-circ_cilk 22 8 22
-circ_cilk 22 16 24
-circ_cilk 22 32 24
-circ_cilk 22 64 20
-circ_cilk 22 128 23
-circ_cilk 23 1 17
-circ_cilk 23 2 18
-circ_cilk 23 4 17
-circ_cilk 23 8 19
-circ_cilk 23 16 24
-circ_cilk 23 32 19
-circ_cilk 23 64 20
-circ_cilk 23 128 24
-circ_cilk 24 1 95
-circ_cilk 24 2 34
-circ_cilk 24 4 29
-circ_cilk 24 8 27
-circ_cilk 24 16 34
-circ_cilk 24 32 29
-circ_cilk 24 64 29
-circ_cilk 24 128 32
-circ_ff 20 1 77
-circ_ff 20 2 87
-circ_ff 20 4 62
-circ_ff 20 8 59
-circ_ff 20 16 74
-circ_ff 20 32 76
-circ_ff 20 64 98
-circ_ff 20 128 108
-circ_ff 21 1 91
-circ_ff 21 2 91
-circ_ff 21 4 99
-circ_ff 21 8 64
-circ_ff 21 16 76
-circ_ff 21 32 74
-circ_ff 21 64 86
-circ_ff 21 128 120
-circ_ff 22 1 130
-circ_ff 22 2 111
-circ_ff 22 4 84
-circ_ff 22 8 95
-circ_ff 22 16 68
-circ_ff 22 32 88
-circ_ff 22 64 103
-circ_ff 22 128 114
-circ_ff 23 1 207
-circ_ff 23 2 174
-circ_ff 23 4 115
-circ_ff 23 8 91
-circ_ff 23 16 87
-circ_ff 23 32 80
-circ_ff 23 64 90
-circ_ff 23 128 153
-circ_ff 24 1 367
-circ_ff 24 2 415
-circ_ff 24 4 192
-circ_ff 24 8 118
-circ_ff 24 16 110
-circ_ff 24 32 92
-circ_ff 24 64 103
-circ_ff 24 128 138
-circ_omp 20 1 20
-circ_omp 20 2 14
-circ_omp 20 4 7
-circ_omp 20 8 4
-circ_omp 20 16 3
-circ_omp 20 32 2
-circ_omp 20 64 2
-circ_omp 20 128 8
-circ_omp 21 1 38
-circ_omp 21 2 29
-circ_omp 21 4 15
-circ_omp 21 8 10
-circ_omp 21 16 7
-circ_omp 21 32 7
-circ_omp 21 64 4
-circ_omp 21 128 4
-circ_omp 22 1 77
-circ_omp 22 2 59
-circ_omp 22 4 32
-circ_omp 22 8 20
-circ_omp 22 16 15
-circ_omp 22 32 10
-circ_omp 22 64 8
-circ_omp 22 128 6
-circ_omp 23 1 154
-circ_omp 23 2 85
-circ_omp 23 4 79
-circ_omp 23 8 58
-circ_omp 23 16 31
-circ_omp 23 32 19
-circ_omp 23 64 14
-circ_omp 23 128 32
-circ_omp 24 1 308
-circ_omp 24 2 167
-circ_omp 24 4 120
-circ_omp 24 8 82
-circ_omp 24 16 61
-circ_omp 24 32 43
-circ_omp 24 64 23
-circ_omp 24 128 17
-circ_stl 20 1 28
-circ_stl 20 2 17
-circ_stl 20 4 16
-circ_stl 20 8 20
-circ_stl 20 16 27
-circ_stl 20 32 48
-circ_stl 20 64 82
-circ_stl 20 128 125
-circ_stl 21 1 46
-circ_stl 21 2 28
-circ_stl 21 4 23
-circ_stl 21 8 26
-circ_stl 21 16 35
-circ_stl 21 32 65
-circ_stl 21 64 109
-circ_stl 21 128 168
-circ_stl 22 1 87
-circ_stl 22 2 48
-circ_stl 22 4 35
-circ_stl 22 8 37
-circ_stl 22 16 46
-circ_stl 22 32 81
-circ_stl 22 64 149
-circ_stl 22 128 235
-circ_stl 23 1 166
-circ_stl 23 2 89
-circ_stl 23 4 60
-circ_stl 23 8 54
-circ_stl 23 16 59
-circ_stl 23 32 107
-circ_stl 23 64 189
-circ_stl 23 128 311
-circ_stl 24 1 321
-circ_stl 24 2 169
-circ_stl 24 4 108
-circ_stl 24 8 88
-circ_stl 24 16 80
-circ_stl 24 32 135
-circ_stl 24 64 233
-circ_stl 24 128 409
-seq_stl 20 1 6
-seq_stl 21 1 12
-seq_stl 22 1 25
-seq_stl 23 1 51
-seq_stl 24 1 102
-block_cilk 25 1 0
-block_cilk 25 2 0
-block_cilk 25 4 0
-block_cilk 25 8 0
-block_cilk 25 16 0
-block_cilk 25 32 0
-block_cilk 25 64 0
-block_cilk 25 128 0
-block_cilk 26 1 0
-block_cilk 26 2 0
-block_cilk 26 4 0
-block_cilk 26 8 0
-block_cilk 26 16 0
-block_cilk 26 32 0
-block_cilk 26 64 0
-block_cilk 26 128 0
-block_ff 25 1 236
-block_ff 25 2 177
-block_ff 25 4 126
-block_ff 25 8 102
-block_ff 25 16 98
-block_ff 25 32 96
-block_ff 25 64 112
-block_ff 25 128 137
-block_ff 26 1 262
-block_ff 26 2 356
-block_ff 26 4 189
-block_ff 26 8 131
-block_ff 26 16 115
-block_ff 26 32 111
-block_ff 26 64 108
-block_ff 26 128 129
-block_omp 25 1 157
-block_omp 25 2 103
-block_omp 25 4 55
-block_omp 25 8 26
-block_omp 25 16 13
-block_omp 25 32 10
-block_omp 25 64 7
-block_omp 25 128 12
-block_omp 26 1 189
-block_omp 26 2 147
-block_omp 26 4 118
-block_omp 26 8 61
-block_omp 26 16 46
-block_omp 26 32 23
-block_omp 26 64 13
-block_omp 26 128 15
-block_stl 25 1 157
-block_stl 25 2 103
-block_stl 25 4 52
-block_stl 25 8 27
-block_stl 25 16 16
-block_stl 25 32 15
-block_stl 25 64 22
-block_stl 25 128 46
-block_stl 26 1 187
-block_stl 26 2 152
-block_stl 26 4 105
-block_stl 26 8 54
-block_stl 26 16 30
-block_stl 26 32 23
-block_stl 26 64 27
-block_stl 26 128 45
-circ_cilk 25 1 42
-circ_cilk 25 2 44
-circ_cilk 25 4 49
-circ_cilk 25 8 43
-circ_cilk 25 16 44
-circ_cilk 25 32 52
-circ_cilk 25 64 44
-circ_cilk 25 128 63
-circ_cilk 26 1 200
-circ_cilk 26 2 69
-circ_cilk 26 4 70
-circ_cilk 26 8 73
-circ_cilk 26 16 71
-circ_cilk 26 32 73
-circ_cilk 26 64 70
-circ_cilk 26 128 64
-circ_ff 25 1 1002
-circ_ff 25 2 555
-circ_ff 25 4 321
-circ_ff 25 8 215
-circ_ff 25 16 167
-circ_ff 25 32 135
-circ_ff 25 64 142
-circ_ff 25 128 198
-circ_ff 26 1 1309
-circ_ff 26 2 1433
-circ_ff 26 4 600
-circ_ff 26 8 337
-circ_ff 26 16 260
-circ_ff 26 32 192
-circ_ff 26 64 194
-circ_ff 26 128 232
-circ_omp 25 1 937
-circ_omp 25 2 467
-circ_omp 25 4 241
-circ_omp 25 8 133
-circ_omp 25 16 69
-circ_omp 25 32 53
-circ_omp 25 64 36
-circ_omp 25 128 33
-circ_omp 26 1 1247
-circ_omp 26 2 751
-circ_omp 26 4 667
-circ_omp 26 8 318
-circ_omp 26 16 214
-circ_omp 26 32 115
-circ_omp 26 64 75
-circ_omp 26 128 54
-circ_stl 25 1 939
-circ_stl 25 2 479
-circ_stl 25 4 251
-circ_stl 25 8 143
-circ_stl 25 16 97
-circ_stl 25 32 126
-circ_stl 25 64 213
-circ_stl 25 128 391
-circ_stl 26 1 1382
-circ_stl 26 2 753
-circ_stl 26 4 504
-circ_stl 26 8 276
-circ_stl 26 16 171
-circ_stl 26 32 167
-circ_stl 26 64 250
-circ_stl 26 128 442
-seq_stl 25 1 204
-seq_stl 26 1 411
-
+m,alg,p,t
+20,block_cilk,1,0
+20,block_cilk,2,0
+20,block_cilk,4,0
+20,block_cilk,8,0
+20,block_cilk,16,0
+20,block_cilk,32,0
+20,block_cilk,64,0
+20,block_cilk,128,0
+20,block_ff,1,81
+20,block_ff,2,76
+20,block_ff,4,79
+20,block_ff,8,77
+20,block_ff,16,78
+20,block_ff,32,86
+20,block_ff,64,100
+20,block_ff,128,129
+20,block_omp,1,3
+20,block_omp,2,2
+20,block_omp,4,1
+20,block_omp,8,0
+20,block_omp,16,0
+20,block_omp,32,2
+20,block_omp,64,2
+20,block_omp,128,4
+20,block_stl,1,3
+20,block_stl,2,2
+20,block_stl,4,2
+20,block_stl,8,2
+20,block_stl,16,4
+20,block_stl,32,7
+20,block_stl,64,15
+20,block_stl,128,32
+20,circ_cilk,1,14
+20,circ_cilk,2,16
+20,circ_cilk,4,10
+20,circ_cilk,8,14
+20,circ_cilk,16,13
+20,circ_cilk,32,9
+20,circ_cilk,64,9
+20,circ_cilk,128,9
+20,circ_ff,1,95
+20,circ_ff,2,89
+20,circ_ff,4,85
+20,circ_ff,8,85
+20,circ_ff,16,88
+20,circ_ff,32,95
+20,circ_ff,64,115
+20,circ_ff,128,162
+20,circ_omp,1,20
+20,circ_omp,2,10
+20,circ_omp,4,5
+20,circ_omp,8,2
+20,circ_omp,16,2
+20,circ_omp,32,1
+20,circ_omp,64,1
+20,circ_omp,128,2
+20,circ_stl,1,30
+20,circ_stl,2,20
+20,circ_stl,4,17
+20,circ_stl,8,22
+20,circ_stl,16,30
+20,circ_stl,32,47
+20,circ_stl,64,78
+20,circ_stl,128,124
+20,seq_stl,1,6
+21,block_cilk,1,0
+21,block_cilk,2,0
+21,block_cilk,4,0
+21,block_cilk,8,0
+21,block_cilk,16,0
+21,block_cilk,32,0
+21,block_cilk,64,0
+21,block_cilk,128,0
+21,block_ff,1,81
+21,block_ff,2,77
+21,block_ff,4,76
+21,block_ff,8,76
+21,block_ff,16,79
+21,block_ff,32,86
+21,block_ff,64,101
+21,block_ff,128,129
+21,block_omp,1,6
+21,block_omp,2,4
+21,block_omp,4,2
+21,block_omp,8,1
+21,block_omp,16,1
+21,block_omp,32,0
+21,block_omp,64,1
+21,block_omp,128,3
+21,block_stl,1,6
+21,block_stl,2,5
+21,block_stl,4,3
+21,block_stl,8,3
+21,block_stl,16,4
+21,block_stl,32,8
+21,block_stl,64,15
+21,block_stl,128,29
+21,circ_cilk,1,16
+21,circ_cilk,2,17
+21,circ_cilk,4,10
+21,circ_cilk,8,16
+21,circ_cilk,16,13
+21,circ_cilk,32,15
+21,circ_cilk,64,12
+21,circ_cilk,128,10
+21,circ_ff,1,114
+21,circ_ff,2,100
+21,circ_ff,4,91
+21,circ_ff,8,87
+21,circ_ff,16,91
+21,circ_ff,32,97
+21,circ_ff,64,115
+21,circ_ff,128,160
+21,circ_omp,1,39
+21,circ_omp,2,20
+21,circ_omp,4,10
+21,circ_omp,8,5
+21,circ_omp,16,4
+21,circ_omp,32,3
+21,circ_omp,64,2
+21,circ_omp,128,3
+21,circ_stl,1,52
+21,circ_stl,2,30
+21,circ_stl,4,23
+21,circ_stl,8,26
+21,circ_stl,16,35
+21,circ_stl,32,57
+21,circ_stl,64,93
+21,circ_stl,128,153
+21,seq_stl,1,12
+22,block_cilk,1,0
+22,block_cilk,2,0
+22,block_cilk,4,0
+22,block_cilk,8,0
+22,block_cilk,16,0
+22,block_cilk,32,0
+22,block_cilk,64,0
+22,block_cilk,128,0
+22,block_ff,1,86
+22,block_ff,2,81
+22,block_ff,4,77
+22,block_ff,8,77
+22,block_ff,16,79
+22,block_ff,32,86
+22,block_ff,64,100
+22,block_ff,128,130
+22,block_omp,1,11
+22,block_omp,2,8
+22,block_omp,4,4
+22,block_omp,8,2
+22,block_omp,16,1
+22,block_omp,32,1
+22,block_omp,64,1
+22,block_omp,128,2
+22,block_stl,1,11
+22,block_stl,2,9
+22,block_stl,4,5
+22,block_stl,8,4
+22,block_stl,16,5
+22,block_stl,32,9
+22,block_stl,64,16
+22,block_stl,128,31
+22,circ_cilk,1,16
+22,circ_cilk,2,16
+22,circ_cilk,4,16
+22,circ_cilk,8,12
+22,circ_cilk,16,17
+22,circ_cilk,32,16
+22,circ_cilk,64,15
+22,circ_cilk,128,12
+22,circ_ff,1,151
+22,circ_ff,2,122
+22,circ_ff,4,102
+22,circ_ff,8,94
+22,circ_ff,16,94
+22,circ_ff,32,100
+22,circ_ff,64,117
+22,circ_ff,128,163
+22,circ_omp,1,76
+22,circ_omp,2,40
+22,circ_omp,4,20
+22,circ_omp,8,11
+22,circ_omp,16,7
+22,circ_omp,32,4
+22,circ_omp,64,4
+22,circ_omp,128,5
+22,circ_stl,1,91
+22,circ_stl,2,51
+22,circ_stl,4,34
+22,circ_stl,8,32
+22,circ_stl,16,41
+22,circ_stl,32,67
+22,circ_stl,64,114
+22,circ_stl,128,187
+22,seq_stl,1,24
+23,block_cilk,1,0
+23,block_cilk,2,0
+23,block_cilk,4,0
+23,block_cilk,8,0
+23,block_cilk,16,0
+23,block_cilk,32,0
+23,block_cilk,64,0
+23,block_cilk,128,0
+23,block_ff,1,97
+23,block_ff,2,89
+23,block_ff,4,81
+23,block_ff,8,79
+23,block_ff,16,80
+23,block_ff,32,87
+23,block_ff,64,101
+23,block_ff,128,132
+23,block_omp,1,22
+23,block_omp,2,17
+23,block_omp,4,8
+23,block_omp,8,5
+23,block_omp,16,2
+23,block_omp,32,1
+23,block_omp,64,2
+23,block_omp,128,3
+23,block_stl,1,22
+23,block_stl,2,17
+23,block_stl,4,9
+23,block_stl,8,6
+23,block_stl,16,6
+23,block_stl,32,9
+23,block_stl,64,17
+23,block_stl,128,33
+23,circ_cilk,1,20
+23,circ_cilk,2,21
+23,circ_cilk,4,16
+23,circ_cilk,8,17
+23,circ_cilk,16,19
+23,circ_cilk,32,20
+23,circ_cilk,64,19
+23,circ_cilk,128,19
+23,circ_ff,1,228
+23,circ_ff,2,166
+23,circ_ff,4,125
+23,circ_ff,8,106
+23,circ_ff,16,99
+23,circ_ff,32,104
+23,circ_ff,64,119
+23,circ_ff,128,169
+23,circ_omp,1,152
+23,circ_omp,2,78
+23,circ_omp,4,40
+23,circ_omp,8,24
+23,circ_omp,16,12
+23,circ_omp,32,9
+23,circ_omp,64,8
+23,circ_omp,128,9
+23,circ_stl,1,170
+23,circ_stl,2,93
+23,circ_stl,4,54
+23,circ_stl,8,44
+23,circ_stl,16,50
+23,circ_stl,32,78
+23,circ_stl,64,133
+23,circ_stl,128,238
+23,seq_stl,1,48
+24,block_cilk,1,0
+24,block_cilk,2,0
+24,block_cilk,4,0
+24,block_cilk,8,0
+24,block_cilk,16,0
+24,block_cilk,32,0
+24,block_cilk,64,0
+24,block_cilk,128,0
+24,block_ff,1,123
+24,block_ff,2,105
+24,block_ff,4,90
+24,block_ff,8,84
+24,block_ff,16,84
+24,block_ff,32,88
+24,block_ff,64,101
+24,block_ff,128,130
+24,block_omp,1,45
+24,block_omp,2,34
+24,block_omp,4,17
+24,block_omp,8,8
+24,block_omp,16,5
+24,block_omp,32,3
+24,block_omp,64,3
+24,block_omp,128,4
+24,block_stl,1,50
+24,block_stl,2,34
+24,block_stl,4,18
+24,block_stl,8,10
+24,block_stl,16,8
+24,block_stl,32,10
+24,block_stl,64,17
+24,block_stl,128,34
+24,circ_cilk,1,138
+24,circ_cilk,2,24
+24,circ_cilk,4,24
+24,circ_cilk,8,21
+24,circ_cilk,16,24
+24,circ_cilk,32,22
+24,circ_cilk,64,23
+24,circ_cilk,128,27
+24,circ_ff,1,371
+24,circ_ff,2,250
+24,circ_ff,4,167
+24,circ_ff,8,128
+24,circ_ff,16,111
+24,circ_ff,32,108
+24,circ_ff,64,124
+24,circ_ff,128,175
+24,circ_omp,1,301
+24,circ_omp,2,158
+24,circ_omp,4,79
+24,circ_omp,8,42
+24,circ_omp,16,24
+24,circ_omp,32,18
+24,circ_omp,64,16
+24,circ_omp,128,15
+24,circ_stl,1,328
+24,circ_stl,2,172
+24,circ_stl,4,97
+24,circ_stl,8,76
+24,circ_stl,16,64
+24,circ_stl,32,90
+24,circ_stl,64,153
+24,circ_stl,128,274
+24,seq_stl,1,96
+25,block_cilk,1,0
+25,block_cilk,2,0
+25,block_cilk,4,0
+25,block_cilk,8,0
+25,block_cilk,16,0
+25,block_cilk,32,0
+25,block_cilk,64,0
+25,block_cilk,128,0
+25,block_ff,1,183
+25,block_ff,2,156
+25,block_ff,4,125
+25,block_ff,8,109
+25,block_ff,16,104
+25,block_ff,32,107
+25,block_ff,64,120
+25,block_ff,128,150
+25,block_omp,1,90
+25,block_omp,2,68
+25,block_omp,4,38
+25,block_omp,8,21
+25,block_omp,16,10
+25,block_omp,32,7
+25,block_omp,64,7
+25,block_omp,128,6
+25,block_stl,1,89
+25,block_stl,2,68
+25,block_stl,4,35
+25,block_stl,8,19
+25,block_stl,16,12
+25,block_stl,32,12
+25,block_stl,64,18
+25,block_stl,128,35
+25,circ_cilk,1,39
+25,circ_cilk,2,42
+25,circ_cilk,4,39
+25,circ_cilk,8,37
+25,circ_cilk,16,36
+25,circ_cilk,32,37
+25,circ_cilk,64,34
+25,circ_cilk,128,34
+25,circ_ff,1,699
+25,circ_ff,2,436
+25,circ_ff,4,269
+25,circ_ff,8,191
+25,circ_ff,16,151
+25,circ_ff,32,140
+25,circ_ff,64,153
+25,circ_ff,128,199
+25,circ_omp,1,601
+25,circ_omp,2,312
+25,circ_omp,4,158
+25,circ_omp,8,90
+25,circ_omp,16,49
+25,circ_omp,32,44
+25,circ_omp,64,32
+25,circ_omp,128,27
+25,circ_stl,1,620
+25,circ_stl,2,330
+25,circ_stl,4,175
+25,circ_stl,8,109
+25,circ_stl,16,89
+25,circ_stl,32,107
+25,circ_stl,64,175
+25,circ_stl,128,306
+25,seq_stl,1,196
+26,block_cilk,1,0
+26,block_cilk,2,0
+26,block_cilk,4,0
+26,block_cilk,8,0
+26,block_cilk,16,0
+26,block_cilk,32,0
+26,block_cilk,64,0
+26,block_cilk,128,0
+26,block_ff,1,280
+26,block_ff,2,226
+26,block_ff,4,164
+26,block_ff,8,129
+26,block_ff,16,115
+26,block_ff,32,113
+26,block_ff,64,123
+26,block_ff,128,157
+26,block_omp,1,180
+26,block_omp,2,138
+26,block_omp,4,70
+26,block_omp,8,36
+26,block_omp,16,19
+26,block_omp,32,12
+26,block_omp,64,11
+26,block_omp,128,10
+26,block_stl,1,181
+26,block_stl,2,137
+26,block_stl,4,70
+26,block_stl,8,37
+26,block_stl,16,22
+26,block_stl,32,17
+26,block_stl,64,22
+26,block_stl,128,36
+26,circ_cilk,1,54
+26,circ_cilk,2,57
+26,circ_cilk,4,60
+26,circ_cilk,8,57
+26,circ_cilk,16,65
+26,circ_cilk,32,60
+26,circ_cilk,64,58
+26,circ_cilk,128,54
+26,circ_ff,1,1300
+26,circ_ff,2,775
+26,circ_ff,4,446
+26,circ_ff,8,281
+26,circ_ff,16,201
+26,circ_ff,32,177
+26,circ_ff,64,175
+26,circ_ff,128,217
+26,circ_omp,1,1202
+26,circ_omp,2,625
+26,circ_omp,4,318
+26,circ_omp,8,165
+26,circ_omp,16,92
+26,circ_omp,32,67
+26,circ_omp,64,52
+26,circ_omp,128,51
+26,circ_stl,1,1221
+26,circ_stl,2,642
+26,circ_stl,4,336
+26,circ_stl,8,194
+26,circ_stl,16,135
+26,circ_stl,32,133
+26,circ_stl,64,201
+26,circ_stl,128,346
+26,seq_stl,1,390
+27,block_cilk,1,0
+27,block_cilk,2,0
+27,block_cilk,4,0
+27,block_cilk,8,0
+27,block_cilk,16,0
+27,block_cilk,32,0
+27,block_cilk,64,0
+27,block_cilk,128,0
+27,block_ff,1,472
+27,block_ff,2,367
+27,block_ff,4,241
+27,block_ff,8,170
+27,block_ff,16,136
+27,block_ff,32,126
+27,block_ff,64,132
+27,block_ff,128,161
+27,block_omp,1,366
+27,block_omp,2,278
+27,block_omp,4,144
+27,block_omp,8,77
+27,block_omp,16,41
+27,block_omp,32,31
+27,block_omp,64,21
+27,block_omp,128,19
+27,block_stl,1,364
+27,block_stl,2,275
+27,block_stl,4,141
+27,block_stl,8,74
+27,block_stl,16,41
+27,block_stl,32,28
+27,block_stl,64,30
+27,block_stl,128,41
+27,circ_cilk,1,102
+27,circ_cilk,2,106
+27,circ_cilk,4,98
+27,circ_cilk,8,103
+27,circ_cilk,16,101
+27,circ_cilk,32,97
+27,circ_cilk,64,100
+27,circ_cilk,128,104
+27,circ_ff,1,2526
+27,circ_ff,2,1446
+27,circ_ff,4,805
+27,circ_ff,8,470
+27,circ_ff,16,306
+27,circ_ff,32,254
+27,circ_ff,64,222
+27,circ_ff,128,258
+27,circ_omp,1,2428
+27,circ_omp,2,1301
+27,circ_omp,4,644
+27,circ_omp,8,368
+27,circ_omp,16,221
+27,circ_omp,32,183
+27,circ_omp,64,110
+27,circ_omp,128,101
+27,circ_stl,1,2447
+27,circ_stl,2,1281
+27,circ_stl,4,664
+27,circ_stl,8,370
+27,circ_stl,16,234
+27,circ_stl,32,206
+27,circ_stl,64,247
+27,circ_stl,128,395
+27,seq_stl,1,780
+28,block_cilk,1,0
+28,block_cilk,2,0
+28,block_cilk,4,0
+28,block_cilk,8,0
+28,block_cilk,16,0
+28,block_cilk,32,0
+28,block_cilk,64,0
+28,block_cilk,128,0
+28,block_ff,1,867
+28,block_ff,2,665
+28,block_ff,4,405
+28,block_ff,8,257
+28,block_ff,16,186
+28,block_ff,32,153
+28,block_ff,64,157
+28,block_ff,128,185
+28,block_omp,1,757
+28,block_omp,2,573
+28,block_omp,4,292
+28,block_omp,8,154
+28,block_omp,16,86
+28,block_omp,32,52
+28,block_omp,64,42
+28,block_omp,128,41
+28,block_stl,1,754
+28,block_stl,2,569
+28,block_stl,4,291
+28,block_stl,8,155
+28,block_stl,16,87
+28,block_stl,32,53
+28,block_stl,64,47
+28,block_stl,128,55
+28,circ_cilk,1,194
+28,circ_cilk,2,202
+28,circ_cilk,4,205
+28,circ_cilk,8,202
+28,circ_cilk,16,201
+28,circ_cilk,32,197
+28,circ_cilk,64,206
+28,circ_cilk,128,193
+28,circ_ff,1,5091
+28,circ_ff,2,2848
+28,circ_ff,4,1554
+28,circ_ff,8,874
+28,circ_ff,16,542
+28,circ_ff,32,398
+28,circ_ff,64,327
+28,circ_ff,128,362
+28,circ_omp,1,4985
+28,circ_omp,2,2606
+28,circ_omp,4,1339
+28,circ_omp,8,720
+28,circ_omp,16,474
+28,circ_omp,32,294
+28,circ_omp,64,244
+28,circ_omp,128,208
+28,circ_stl,1,5004
+28,circ_stl,2,2614
+28,circ_stl,4,1356
+28,circ_stl,8,752
+28,circ_stl,16,460
+28,circ_stl,32,344
+28,circ_stl,64,343
+28,circ_stl,128,470
+28,seq_stl,1,1576
+29,block_cilk,1,0
+29,block_cilk,2,0
+29,block_cilk,4,0
+29,block_cilk,8,0
+29,block_cilk,16,0
+29,block_cilk,32,0
+29,block_cilk,64,0
+29,block_cilk,128,0
+29,block_ff,1,1715
+29,block_ff,2,1288
+29,block_ff,4,756
+29,block_ff,8,442
+29,block_ff,16,290
+29,block_ff,32,230
+29,block_ff,64,236
+29,block_ff,128,262
+29,block_omp,1,1600
+29,block_omp,2,1196
+29,block_omp,4,621
+29,block_omp,8,331
+29,block_omp,16,187
+29,block_omp,32,125
+29,block_omp,64,117
+29,block_omp,128,116
+29,block_stl,1,1587
+29,block_stl,2,1180
+29,block_stl,4,617
+29,block_stl,8,324
+29,block_stl,16,182
+29,block_stl,32,123
+29,block_stl,64,115
+29,block_stl,128,119
+29,circ_cilk,1,535
+29,circ_cilk,2,434
+29,circ_cilk,4,437
+29,circ_cilk,8,431
+29,circ_cilk,16,435
+29,circ_cilk,32,430
+29,circ_cilk,64,446
+29,circ_cilk,128,438
+29,circ_ff,1,10412
+29,circ_ff,2,5740
+29,circ_ff,4,3086
+29,circ_ff,8,1699
+29,circ_ff,16,1016
+29,circ_ff,32,682
+29,circ_ff,64,582
+29,circ_ff,128,604
+29,circ_omp,1,10312
+29,circ_omp,2,5413
+29,circ_omp,4,2787
+29,circ_omp,8,1531
+29,circ_omp,16,911
+29,circ_omp,32,570
+29,circ_omp,64,499
+29,circ_omp,128,463
+29,circ_stl,1,10261
+29,circ_stl,2,5360
+29,circ_stl,4,2793
+29,circ_stl,8,1525
+29,circ_stl,16,916
+29,circ_stl,32,623
+29,circ_stl,64,561
+29,circ_stl,128,669
+29,seq_stl,1,3170

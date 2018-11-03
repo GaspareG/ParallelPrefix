@@ -208,10 +208,12 @@ Now we can compare the completion time of all the algorithms:
 \caption{Comparison of the three algorithms with different parallelism degrees}
 \end{table}
 
-What we can see from the table is that until $p = 2$ the improvement is negligible, but when the parallelism degree increase the parallel algorithms .
+What we can see from the table is that until $p = 2$ the improvement is negligible, but when the parallelism degree increase the parallel algorithms scales very well.
+
+\medskip
 
 The circuit-based algorithm reach its best performance for $p \geq n/2$ where each task is computed in $1 \times t_{\oplus}$. 
-The block-based algorithm scale as well as the circuit-based, but when the parallelism degree increase we have a lack of performance due the trade-off between the parallel part of the first and the third stage ($2n/p \times t_{\oplus}$) and the second stage that must be performed sequentially ($p \times t_{\oplus}$).
+The block-based algorithm scales as well as the circuit-based, but when the parallelism degree increase we have a lack of performance due the trade-off between the parallel part of the first and the third stage ($2n/p \times t_{\oplus}$) and the second stage that must be performed sequentially ($p \times t_{\oplus}$).
 
 %induced for the second phase of the algorithm as it does a serial computation of $p \times t_{\oplus}$.
 
@@ -231,7 +233,7 @@ Among with the implementions the project include a benchmark suite that provide 
 \smallskip
 
 To compile the project is enough to run the \textit{compile.sh} script inside the project folder.
-If needed a short help is available for consultation, just run \textit{./benchmark -h}.
+If needed a short help is available for consultation, just run \textit{./bin/benchmark -h}.
 
 \subsection{Sequential algorithm}
 
@@ -239,33 +241,41 @@ The sequential implementations is simply an iteration over the input vector like
 
 \subsection{Block-based algorithm}
 
-TODO
+The main problem in the implementation of the block-based algorithm is how to manage, create and assign the blocks to the threads.
+
+To solve this in the project 
 
 \subsection{Circuit-based algorithm}
 
-TODO
+In the implementation of this algorithm we use again the block manager together with
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Experimental validation}
 
-The experiments were executed on a CPU \textit{Xeon Phi KNC} with $64$ physical core, each of them with a four-way multithreading support (for a total of $256$ threads).
+\subsection{experiments details}
+
+The experiments were executed on a CPU \textit{Xeon Phi KNC} with $64$ physical cores, each of them with a four-way multithreading support (for a total of $256$ threads).
 
 \begin{itemize}
   \item Each running time is expressed in milliseconds and it is an average of $5$ repeated test.
   \item Each implemented algorithm was tested with $p \in \{1, 2, 4, 8, 16, 32, 64, 128\}$.
   \item Each implemented algorithm was tested with $n \in \{2^{20}, 2^{21}, \ldots, 2^{28}, 2^{29}\}$.
+  \item The correctness of each algorithm has been tested with the sequential algorithm.
+  
+\smallskip
+
+To replicate the experiments just run the benchmark with these parameters:
+\begin{equation*}
+  \text{./benchmark --check --all --m-min 20 --m-max 29 --exp 5 --par-max 128}
+\end{equation*}
+
 \end{itemize}
-
-TODO
-
-
-\subsection{experiments details}
-
-TODO
 
 \subsection{benchmark results}
 
-TODO
+% absolute speedup Sa(p) = Tseq / Tp
+% relative speedup Sr(p) = T1 / Tp
+% efficiency e(p) = T1 / ( p * Tp )
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
