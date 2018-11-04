@@ -41,6 +41,7 @@
 #include <utility>
 #include <numeric>
 #include <cilk/cilk.h>
+#include <cilk/cilk_api.h>
 #include "utils/clock.hpp"
 
 namespace spm
@@ -77,6 +78,9 @@ namespace spm
         spm::range_t ranges(N, parDeg);
 
         auto start_time = spm::timer::start();
+
+        __cilkrts_end_cilk();
+        __cilkrts_set_param("nworkers", (std::to_string(parDeg)).c_str());
 
         /*******************************************************************/
         // First phase

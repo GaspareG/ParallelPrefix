@@ -41,6 +41,7 @@
 #include <utility>
 #include <numeric>
 #include <cilk/cilk.h>
+#include <cilk/cilk_api.h>
 #include "utils/clock.hpp"
 #include "utils/circuit.hpp"
 
@@ -81,6 +82,9 @@ namespace spm
         // assert((1<<m) == n);
 
         auto start_time = spm::timer::start();
+
+        __cilkrts_end_cilk();
+        __cilkrts_set_param("nworkers", (std::to_string(parDeg)).c_str());
 
         /*******************************************************************/
         // First phase

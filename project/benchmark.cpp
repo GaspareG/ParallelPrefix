@@ -85,7 +85,7 @@ using test_t = unsigned long long int;
 test_t op(test_t a, test_t b)
 {
   return a+b;
-};
+}
 
 template <typename T>
 std::ostream& operator<< (std::ostream& out, const std::vector<T>& v) {
@@ -224,35 +224,35 @@ int main(int argc, char**argv)
   // Request help or not choosing any algorithm
   if(f_help || !f_experiments)
   {
-    std::cout << options.help() << std::endl;
+    std::cerr << options.help() << std::endl;
     return 1;
   }
 
   // Check vector size
   if(!(M_MIN <= m_min && m_min <= m_max && m_max <= M_MAX))
   {
-    std::cout << "Error in vector size (check m_min and m_max options)" << std::endl;
+    std::cerr << "Error in vector size (check m_min and m_max options)" << std::endl;
     return 1;
   }
 
   // Check parallelism degree
   if(!(1 <= par_min && par_min <= par_max && par_max <= max_threads))
   {
-    std::cout << "Error in parallelism degree (check par_min and par_max options)" << std::endl;
+    std::cerr << "Error in parallelism degree (check par_min and par_max options)" << std::endl;
     return 1;
   }
 
   // Check dataset
-  if(!(0 <= dataset && dataset <= 2))
+  if(!(dataset <= 2))
   {
-    std::cout << "Error in dataset creation (check dataset option)" << std::endl;
+    std::cerr << "Error in dataset creation (check dataset option)" << std::endl;
     return 1;
   }
 
   // check experiments
   if(experiments == 0)
   {
-    std::cout << "Error in number of experiments (check experiments option)" << std::endl;
+    std::cerr << "Error in number of experiments (check experiments option)" << std::endl;
     return 1;
   }
 
@@ -261,7 +261,7 @@ int main(int argc, char**argv)
   std::vector<test_t> output_seq(1<<m_max, 0);
   std::vector<test_t> output_par(1<<m_max, 0);
 
-  std::cout << dataset << std::endl;
+  std::cerr << dataset << std::endl;
   if(dataset == 0)
   {
     std::mt19937 rng(seed);
@@ -306,7 +306,7 @@ int main(int argc, char**argv)
   // For each k
   for(unsigned int m = m_max; m >= m_min; --m)
   {
-    std::cout << "m = " << m << " | n = " << (1<<m) << std::endl;
+    std::cerr << "m = " << m << " | n = " << (1<<m) << std::endl;
 
     (*input).resize(1<<m);
     output_seq.resize(1<<m);
@@ -326,7 +326,7 @@ int main(int argc, char**argv)
     // For each parDeg
     for(unsigned int p=par_min; p<=par_max; p=(f_par_lin?(p+1):(p*2)))
     {
-      std::cout << "\tp = " << p << std::endl;
+      std::cerr << "\tp = " << p << std::endl;
 
       block_stl.setParallelismDegree(p);
       block_ff.setParallelismDegree(p);
@@ -351,7 +351,7 @@ int main(int argc, char**argv)
           res_times[{"block_stl", m, p}] += block_stl.getLastTime();
           if(f_check && output_seq != output_par)
           {
-            std::cout << "ERROR IN BLOCK_STL!" << std::endl;
+            std::cerr << "ERROR IN BLOCK_STL!" << std::endl;
             return -1;
           }
         }
@@ -364,7 +364,7 @@ int main(int argc, char**argv)
           res_times[{"block_ff", m, p}] += block_ff.getLastTime();
           if(f_check && output_seq != output_par)
           {
-            std::cout << "ERROR IN BLOCK_FF!" << std::endl;
+            std::cerr << "ERROR IN BLOCK_FF!" << std::endl;
             return -1;
           }
         }
@@ -377,7 +377,7 @@ int main(int argc, char**argv)
           res_times[{"block_omp", m, p}] += block_omp.getLastTime();
           if(f_check && output_seq != output_par)
           {
-            std::cout << "ERROR IN BLOCK_OMP!" << std::endl;
+            std::cerr << "ERROR IN BLOCK_OMP!" << std::endl;
             return -1;
           }
         }
@@ -391,7 +391,7 @@ int main(int argc, char**argv)
           res_times[{"block_cilk", m, p}] += block_cilk.getLastTime();
           if(f_check && output_seq != output_par)
           {
-            std::cout << "ERROR IN BLOCK_CILK!" << std::endl;
+            std::cerr << "ERROR IN BLOCK_CILK!" << std::endl;
             return -1;
           }
         }
@@ -405,7 +405,7 @@ int main(int argc, char**argv)
           res_times[{"circ_stl", m, p}] += circ_stl.getLastTime();
           if(f_check && output_seq != output_par)
           {
-            std::cout << "ERROR IN CIRC_STL!" << std::endl;
+            std::cerr << "ERROR IN CIRC_STL!" << std::endl;
             return -1;
           }
         }
@@ -417,7 +417,7 @@ int main(int argc, char**argv)
           res_times[{"circ_ff", m, p}] += circ_ff.getLastTime();
           if(f_check && output_seq != output_par)
           {
-            std::cout << "ERROR IN CIRC_FF!" << std::endl;
+            std::cerr << "ERROR IN CIRC_FF!" << std::endl;
             return -1;
           }
         }
@@ -430,7 +430,7 @@ int main(int argc, char**argv)
           res_times[{"circ_omp", m, p}] += circ_omp.getLastTime();
           if(f_check && output_seq != output_par)
           {
-            std::cout << "ERROR IN CIRC_OMP!" << std::endl;
+            std::cerr << "ERROR IN CIRC_OMP!" << std::endl;
             return -1;
           }
         }
@@ -444,7 +444,7 @@ int main(int argc, char**argv)
           res_times[{"circ_cilk", m, p}] += circ_cilk.getLastTime();
           if(f_check && output_seq != output_par)
           {
-            std::cout << "ERROR IN CIRC_CILK!" << std::endl;
+            std::cerr << "ERROR IN CIRC_CILK!" << std::endl;
             return -1;
           }
         }
@@ -453,7 +453,7 @@ int main(int argc, char**argv)
     }
   }
 
-  std::cout << "Results..." << std::endl;
+  std::cerr << "Results..." << std::endl;
 
   std::cout << "alg,m,p,t" << std::endl;
   for(auto [k, t] : res_times)
