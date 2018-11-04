@@ -44,6 +44,8 @@
 #include "utils/clock.hpp"
 #include "utils/circuit.hpp"
 
+#define GRAIN_SIZE 1024
+
 namespace spm
 {
   namespace circuit
@@ -90,7 +92,7 @@ namespace spm
 
         // In the first task we need also to copy all the value from input to output
         // Then in second and third phase we can work in place
-        pf.parallel_for(1, spm::circuit::k1(1, m) + 1, [&](const long int k)
+        pf.parallel_for(1, spm::circuit::k1(1, m) + 1, 1, GRAIN_SIZE, [&](const long int k)
         {
           auto[l, r] = spm::circuit::g1(1, k);
           output[l] = (*input)[l];
@@ -104,7 +106,7 @@ namespace spm
 
         for (int t = 2; t <= m; t++)
         {
-          pf.parallel_for(1, spm::circuit::k1(t, m) + 1, [&](const long int k)
+          pf.parallel_for(1, spm::circuit::k1(t, m) + 1, 1, GRAIN_SIZE, [&](const long int k)
           {
             auto[l, r] = spm::circuit::g1(t, k);
             output[r] = op(output[l], output[r]);
@@ -118,7 +120,7 @@ namespace spm
 
         for (int t = 1; t < m; t++)
         {
-          pf.parallel_for(1, spm::circuit::k2(t) + 1, [&](const long int k)
+          pf.parallel_for(1, spm::circuit::k2(t) + 1, 1, GRAIN_SIZE, [&](const long int k)
           {
             auto[l, r] = spm::circuit::g2(t, k, m);
             output[r] = op(output[l], output[r]);

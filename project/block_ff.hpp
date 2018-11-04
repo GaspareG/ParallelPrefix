@@ -94,7 +94,7 @@ namespace spm
 
         // Launch in parallel using FastFlow
         // the execution of block_prefix over all the block
-        pf.parallel_for(0, ranges.blocks(), block_prefix);
+        pf.parallel_for(0, ranges.blocks(), 1, GRAIN_SIZE, block_prefix);
 
         auto step1 = spm::timer::step(start_time);
 
@@ -126,7 +126,7 @@ namespace spm
 
         // Launch in parallel using FastFlow
         // the execution of block_prefix over all the block (except the first)
-        pf.parallel_for(1, ranges.blocks(), block_add);
+        pf.parallel_for(1, ranges.blocks(), 1, GRAIN_SIZE, block_add);
 
         auto step3 = spm::timer::step(start_time);
         /*******************************************************************/
