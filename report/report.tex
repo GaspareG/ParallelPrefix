@@ -332,49 +332,71 @@ As first benchmark we simple compare the completion time of each algorithm with 
 
 \smallskip
 
-What we can see from the first raw data is that, as expected, for $p = 1$ and $p = 2$ the block-based algorithm is similar to the sequential algorithm while, on the other hand, the circuit-based algorithm performe worst than expected but scale very well increasing the parallelism degree.
+What we can see from the first raw data is that, as expected, for $p = 1$ and $p = 2$ the block-based algorithm is similar to the sequential algorithm while, on the other hand, the circuit-based algorithm performe worst than expected but both of them scale very well increasing the parallelism degree.
 
 \subsubsection{Speedup}
 
-The speedup is calculated as: $s(p) = T_{seq} / T_{par}(p)$
-
+The speedup is calculated as: $s(p) = T_{seq} / T_{par}(p)$ for each algorithm.
 \begin{center}
-\begin{minipage}{0.9\linewidth}
+\begin{minipage}{0.75\linewidth}
 \includegraphics[width=\linewidth]{img/speedup}
-\captionof{figure}{Block-based algorithm graphic representation} 
+\captionof{figure}{$s(p)$ of each implementations, $n = 2^{29}$} 
 \end{minipage}
 \end{center}
-
-From the plot we see,, bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla
+From this plot we can clearly see the differences in the initial speedup between the block-based implementations and the circuit-based implementations.
+Another thing we can observe is that the slopes of the circuit-based implementations are more regular than the block-based implementations, more similar to ideal and start to slowdown only when $p = 64$.
 
 \subsubsection{Scalability}
 
-The scalability is calculated as: $s(p) = T_{par}(1) / T_{par}(p)$
+The scalability is calculated as: $scalab(p) = T_{par}(1) / T_{par}(p)$ for each algorithm.
 
 \begin{center}
-\begin{minipage}{0.9\linewidth}
+\begin{minipage}{0.75\linewidth}
 \includegraphics[width=\linewidth]{img/scalability}
-\captionof{figure}{Block-based algorithm graphic representation} 
+\captionof{figure}{$scalab(p)$ of each implementations, $n = 2^{29}$}  
 \end{minipage}
 \end{center}
 
-From the plot we see,  bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla
+From this plot we can see that the circuit-based implementations are slightly better than the block-based implementations but a big outlier is the \textit{block\_cilk} that stop to scale very quickly starting from $p = 4$. 
 
 \subsubsection{Efficiency}
 
-The efficiency is calculated as: $\epsilon(p) = T_{seq} / (p \times T_{par}(p) )$
+The efficiency is calculated as: $\epsilon(p) = T_{seq} / (p \times T_{par}(p) )$ for each algorithm.
 
 \begin{center}
-\begin{minipage}{0.9\linewidth}
+\begin{minipage}{0.75\linewidth}
 \includegraphics[width=\linewidth]{img/efficiency}
-\captionof{figure}{Block-based algorithm graphic representation} 
+\captionof{figure}{$\epsilon(p)$ of each implementations, $n = 2^{29}$} 
 \end{minipage}
 \end{center}
 
-From the plot we see,  bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla
+Once again we can see the differences between the circuit-based implementations and the block-based ones and, as before, we have two outliers that are the two implementations with the \textit{CilkPlus} API.
+
+\subsubsection{Completion time}
+
+As last test we have compared the running time of each implementations with all the values of $p$ and using all the physical cores.
+
+\begin{center}
+\begin{minipage}{0.75\linewidth}
+\includegraphics[width=\linewidth]{img/completion}
+\captionof{figure}{$T_{C_{p}}$ with $p = 64$ and $p \in \{2^{20}, \ldots, 2^{29}\}$ (lower in better)} 
+\end{minipage}
+\end{center}
+
+From the plot we can see a great slope for the \textit{circuit\_cilk} that starts as the lowest implementation from small input but ends to be one of the most efficient with big input.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
+
+We can divide the observations into two categories: based on the algorithm and on the implementation.
+
+\medskip
+
+For the algorithms, in our case, the block-based was definitely better than the circuit-based. One of the main causes is definitely the ratio between the size of the input and the parallelism degree, as in the performance modelling we have seen that the circuit-based perform better than the block-based one when $p \simeq n/2$, this is not the case of our experiments as we have $n = 2^{29}$ and $p = 2^{7}$. On the other hand the circuit-based proves to have a better scalability, so it could be interesting to analyze its behavior with an higher parallelism degree. Also, due its \textit{electronic-like} modelling it could also be interesting to implement the algorithm on the hardware (like FPGA, GPGPU, ...).
+
+\medskip
+
+Regarding the kind of implementation we have clearly seen that both \textit{circ\_cilk} and \textit{block\_cilk} have a really poor performance. Surprising is instead the result of \textit{OpenMP} that have the best performance other all the implementations. And finaly the performances of the implementations in \textit{STL} and \textit{FastFlow} are very similar and difficoult to compare. But, from a programmer point-of-view, it was easier to implement the algorithms using the \textit{FastFlow} than in \textit{STL}.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

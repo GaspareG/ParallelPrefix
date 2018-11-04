@@ -66,6 +66,10 @@ for(int i=0, p=1; i<8; ++i, p *= 2) f8[i] = (p, p8[i]);
 
 draw(graph(f8),"circuit\_cilk", marker(scale(1.5mm)*polygon(6),grey,FillDraw(gray(0)),above=false));
 //////////////////////////////////////
+pair[] ideal = {(0,0.),(0,0.),(0,0.),(0,0),(0,0)};
+for(int i=0, p=1; i<5; ++i, p *= 2) ideal[i] = (p, p);
+draw(graph(ideal),"ideal", marker(scale(1.5mm)*polygon(100),grey,FillDraw(gray(0.9)),above=false));
+//////////////////////////////////////
 
 
 scale(Log,Log);
@@ -73,7 +77,7 @@ xaxis("p",BottomTop,LeftTicks(DefaultFormat,new real[] {1, 2, 4, 8, 16, 32, 64, 
 
 scale(Log,Log);
 
-yaxis("$s(p)$",LeftRight,RightTicks(DefaultFormat, new real[] { 1, 2, 4, 8, 13} ));
+yaxis("$s(p)$",LeftRight,RightTicks(DefaultFormat, new real[] { 1, 2, 4, 8, 16} ));
 
 add(currentpicture, legend(),point(SE),10N+10W,UnFill);
 

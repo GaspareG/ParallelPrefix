@@ -62,7 +62,6 @@ pair[] f8 = {(0,0.),(0,0.),(0,0.),(0,0),(0,0),(0,0),(0,0)};
 for(int i=0, p=1; i<8; ++i, p *= 2) f8[i] = (p, p8[i]);
 
 draw(graph(f8),"circuit\_cilk", marker(scale(1.5mm)*polygon(6),grey,FillDraw(gray(0)),above=false));
-//////////////////////////////////////
 
 
 scale(Log,Log);

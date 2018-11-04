@@ -43,6 +43,8 @@
 #include <ff/parallel_for.hpp>
 #include "utils/clock.hpp"
 
+#define GRAIN_SIZE 1024
+
 namespace spm
 {
   namespace block
