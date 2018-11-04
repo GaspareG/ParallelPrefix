@@ -137,7 +137,6 @@ namespace spm
         // Update last time statistic
         step3 = step3 - step2;
         step2 = step2 - step1;
-
         last_test = {step1, step2, step3};
 
       }

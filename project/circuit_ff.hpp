@@ -126,6 +126,7 @@ namespace spm
         }
 
         auto step3 = spm::timer::step(start_time);
+
         /*******************************************************************/
 
         // Update last time statistic

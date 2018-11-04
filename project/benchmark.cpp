@@ -377,7 +377,7 @@ int main(int argc, char**argv)
           res_times[{"block_omp", m, p}] += block_omp.getLastTime();
           if(f_check && output_seq != output_par)
           {
-            std::cout << "ERROR IN BLOCK_STL!" << std::endl;
+            std::cout << "ERROR IN BLOCK_OMP!" << std::endl;
             return -1;
           }
         }
@@ -430,7 +430,7 @@ int main(int argc, char**argv)
           res_times[{"circ_omp", m, p}] += circ_omp.getLastTime();
           if(f_check && output_seq != output_par)
           {
-            std::cout << "ERROR IN CIRC_STL!" << std::endl;
+            std::cout << "ERROR IN CIRC_OMP!" << std::endl;
             return -1;
           }
         }
@@ -455,11 +455,12 @@ int main(int argc, char**argv)
 
   std::cout << "Results..." << std::endl;
 
+  std::cout << "alg,m,p,t" << std::endl;
   for(auto [k, t] : res_times)
   {
     auto [s, m, p] = k;
     t /= experiments;
-    std::cout << s << " " << m << " " << p << " " << t << std::endl;
+    std::cout << s << "," << m << "," << p << "," << t << std::endl;
   }
 
  return 0;

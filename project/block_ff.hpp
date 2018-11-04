@@ -134,8 +134,8 @@ namespace spm
         // Update last time statistic
         step3 = step3 - step2;
         step2 = step2 - step1;
-
         last_test = {step1, step2, step3};
+
       }
 
       std::array<spm::timer::ms_t, 3> getLastTest()

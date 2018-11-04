@@ -90,7 +90,7 @@ namespace spm
         };
 
         // omp parallel for execute one call to block_prefix per thread
-        // #pragma omp parallel for schedule(static) num_threads(parDeg)
+        #pragma omp parallel for schedule(static) num_threads(parDeg)
         for (unsigned int i = 0; i < ranges.blocks(); ++i)
         {
           block_prefix(i);
@@ -125,7 +125,7 @@ namespace spm
         };
 
         // omp parallel for execute one call to block_prefix per thread
-        // #pragma omp parallel for schedule(static) num_threads(parDeg)
+        #pragma omp parallel for schedule(static) num_threads(parDeg)
         for (unsigned int i = 1; i < ranges.blocks(); ++i)
         {
           block_add(i);
@@ -137,11 +137,9 @@ namespace spm
         // Update last time statistic
         step3 = step3 - step2;
         step2 = step2 - step1;
-
         last_test = {step1, step2, step3};
 
       }
-
 
       std::array<spm::timer::ms_t, 3> getLastTest()
       {
