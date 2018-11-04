@@ -29,7 +29,7 @@ In this report we will analyze, theoretically and practically, the resolution of
 
 \medskip
 
-\textit{Given a vector $x = \langle x_{0}, x_{1}, \ldots, x_{n-1} \rangle$ and a binary operation $\oplus$ compute the vector $y = \langle x_{0}, x_{0} \oplus x_{1}, x_{0} \oplus x_{1} \oplus x_{2}, \ldots, x_{0} \oplus x_{1} \oplus \ldots \oplus x_{n-1} \rangle$.} % , i.e. each element of the output vector at position $i$ is the results of 
+\textit{Given a vector $x = \langle x_{0}, x_{1}, \ldots, x_{n-1} \rangle$ and a binary operation $\oplus$, compute the vector $y = \langle x_{0}, x_{0} \oplus x_{1}, x_{0} \oplus x_{1} \oplus x_{2}, \ldots, x_{0} \oplus x_{1} \oplus \ldots \oplus x_{n-1} \rangle$.} % , i.e. each element of the output vector at position $i$ is the results of 
 
 \medskip
 
@@ -73,9 +73,9 @@ We will now introduce two different algorithms that solve in an efficient way th
 The idea behind the first parallel algorithm is to compute the prefix vector in three phases:
 
 \begin{itemize}
-  \item Partitionate the input vector in blocks and compute in parallel the prefix vector of each of them.
+  \item Partitionate the input vector in blocks and compute. in parallel, the prefix vector of each of them.
   \item In the second phase we put the final element of each block in a temporary vector and compute its prefix vector.
-  \item Finally for each block $i$ (except for the first one) add in parallel the $(i-1)$th element of the temporary vector.
+  \item Finally for each block $i$ (starting from the second) add, in parallel, the $(i-1)$th element of the temporary vector.
 \end{itemize}
 
 At the end of the three phases the final vector contains the correct prefixes.
@@ -143,9 +143,11 @@ For the theoretical performance modeling we will denote with:
 
 \begin{itemize}
   \item $n = 2^m$ the size of the input vector ($m = \log_2{n}$).
-  \item $p$ the parallelism degree (for simplicity $p \leq n$).
+  \item $p$ the parallelism degree (for simplicity $1 \leq p \leq n$).
   \item $t_{\oplus}$ is the time to compute a single $\oplus$ operation.
 \end{itemize} 
+
+We will use this assumption to estimate a theoretical completion time for each algorithm seen.
 
 \subsection{Sequential algorithm}
 
@@ -156,18 +158,18 @@ The completion time of the sequential algorithm is simply $T^{s}_C = (n-1) \time
 The parallel completion time of the block-based algorithm is the sum of the completion times of all of the three phases:
 
 \begin{equation*}
-  T^{b}_{C_p} \geq T_{1_p} + T_{2_p} + T_{3_p}
+  T^{b}_{C_p} \simeq T_{1_p} + T_{2_p} + T_{3_p}
 \end{equation*} 
 
 Where:
 
 \begin{itemize}
-  \item $T_{1_p} = (n/p) \times t_{\oplus}$ is the time to compute the prefix sums of a single block (as all the $p$ blocks are performed in parallel).
-  \item $T_{2_p} = p \times t_{\oplus}$ is the time to compute the prefix sums over the temporary vector.
-  \item $T_{3_p} = (n/p) \times t_{\oplus}$ (or $0$ if $p = 1$) is the time to add a value to a single block (except the first one).
+  \item $T_{1_p} \simeq (n/p) \times t_{\oplus}$ is the time to compute the prefix sums of a single block (as all the $p$ blocks are performed in parallel).
+  \item $T_{2_p} \simeq p \times t_{\oplus}$ is the time to compute the prefix sums over the temporary vector.
+  \item $T_{3_p} \simeq (n/p) \times t_{\oplus}$ (or $0$ if $p = 1$) is the time to add a value to a single block (except the first one).
 \end{itemize}
 
-So the total completion time is $T^{b}_{C_p} \geq (2n/p + p) \times t_{\oplus}$.
+So the total completion time is $T^{b}_{C_p} \simeq (2n/p + p) \times t_{\oplus}$.
 
 \smallskip
 
@@ -190,8 +192,7 @@ When this is not the case a task $T_i$ is perfomed in $\max(1, |T_i|/p) \times t
 
 \subsection{Comparison table}
 
-Now we can compare the completion time of all the algorithms:
-
+Now we can compare the expected completion time of all the algorithms:
 \begin{table}[h]
 \centering
 \begin{tabular}{|c|r|r|r|}
@@ -210,58 +211,88 @@ Now we can compare the completion time of all the algorithms:
 
 What we can see from the table is that until $p = 2$ the improvement is negligible, but when the parallelism degree increase the parallel algorithms scales very well.
 
-\medskip
-
 The circuit-based algorithm reach its best performance for $p \geq n/2$ where each task is computed in $1 \times t_{\oplus}$. 
 The block-based algorithm scales as well as the circuit-based, but when the parallelism degree increase we have a lack of performance due the trade-off between the parallel part of the first and the third stage ($2n/p \times t_{\oplus}$) and the second stage that must be performed sequentially ($p \times t_{\oplus}$).
 
-%induced for the second phase of the algorithm as it does a serial computation of $p \times t_{\oplus}$.
+In practive we expect, for p equals to $1$ and $2$, the completion time for the parallel algorithms to be similar or greater than the sequential algorithm. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Implementations structure and details}
 
 All the implementations are written in C++17, the source code is available as attachment with the report or on \href{https://github.com/GaspareG/ParallelPrefix}{GitHub}.
-
 Both of the parallel algorithms have been implemented using the standard C++ threads, the FastFlow framework and the OpenMP/Cilk Plus API. All the algorithms are designed to avoid race conditions between the operations in the same phase, so there is no need for any special synchronization mechanism except for the barriers at the end of each phase to pass to the next one.
 
 Each different implementation is available as single class in a single \textit{.hpp} file. All the classes provide the methods to change the parallelism degree, to start the computation and to get time statistics of last computation.
 
-\smallskip
-
 Among with the implementions the project include a benchmark suite that provide different features for the tests: select which algorithm execute, select the range of input size, select the range for the parallelism degree and many other options.
-
-\smallskip
 
 To compile the project is enough to run the \textit{compile.sh} script inside the project folder.
 If needed a short help is available for consultation, just run \textit{./bin/benchmark -h}.
 
 \subsection{Sequential algorithm}
 
-The sequential implementations is simply an iteration over the input vector likely the implementation of the \textit{std::partial\_sum} function.
+The sequential implementations is simply an iteration over the input vector likely the implementation of the \textit{std::inclusive\_scan} function.
+
+\smallskip
+
+As a side note, starting from \textit{C++17} standard the language provide a parallel version of many standard algorithms. In our case it is enough to write:
+
+\smallskip
+
+\textit{std::inclusive\_scan(std::execution::par\_unseq, std::begin(input), std::end(input), std::begin(output);}
+
+\smallskip
+
+Unfortunately there is still no support for the parallel algorithms in the \textit{g++} compiler (neither in \textit{clang++}).
 
 \subsection{Block-based algorithm}
 
-The main problem in the implementation of the block-based algorithm is how to manage, create and assign the blocks to the threads.
+The main problem in the implementation of the block-based algorithm is how to manage, create and assign the blocks to the threads. To solve this issue, in the project we have implemented a class to handle the block division, in particolar the size of a block is $\max(1024, n/p)$: we don't the create blocks of size less than $1024$, in order to avoid useless threads that execute only a little portion of the computations.
 
-To solve this in the project 
+\medskip
+
+To implement the parallelism we have used:
+
+\begin{itemize}
+  \item \textbf{STL}: for each block spawn a new thread and join them to the main thread at the end of the computations.
+  \item \textbf{OpenMP}: the directive \textit{\#pragma omp parallel for}, setting the scheduling to \textit{static} and fixing the parallelism degree to $p$.
+  \item \textbf{CilkPlus}: the construct \textit{cilk\_for} and setting \textit{nworkers = p}.
+  \item \textbf{FastFlow}: a \textit{ff::ParallelFor} object with \textit{maxnw = p}, \textit{grainsize = $1024$} and using it to launch in parallel the lambda functions.
+\end{itemize}
 
 \subsection{Circuit-based algorithm}
 
-In the implementation of this algorithm we use again the block manager together with
+In the implementation of this algorithm we use again the block manager together with handler functions to manage the creation of tasks (in particular to generate, given a task number and a iteration number, the operation to execute).
+
+\smallskip
+
+The main problem in this algorithm is that in the execution of the prefix circuit we have assumed to work in-place over the input vector. To solve this issue we have separated the execution of the first task in order to read the data from the input vector and writing the results in the output vector. In this way all the next tasks work in-place over the output vector.
+
+\smallskip
+
+To implement the parallelism we have used the same mechanisms of the block-based algorithm.
+
+\smallskip
+
+Unfortunately, due to task dependency, the implementations have to spawn a large number of threads and this can lead to a non-trascurable overhead in the final completion time.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Experimental validation}
 
 \subsection{experiments details}
 
-The experiments were executed on a CPU \textit{Xeon Phi KNC} with $64$ physical cores, each of them with a four-way multithreading support (for a total of $256$ threads).
+The experiments were executed on a CPU \textit{Xeon Phi KNC} with $64$ physical cores, each of them with a four-way multithreading support (for a total of $256$ threads). In particular:
 
 \begin{itemize}
   \item Each running time is expressed in milliseconds and it is an average of $5$ repeated test.
-  \item Each implemented algorithm was tested with $p \in \{1, 2, 4, 8, 16, 32, 64, 128\}$.
-  \item Each implemented algorithm was tested with $n \in \{2^{20}, 2^{21}, \ldots, 2^{28}, 2^{29}\}$.
+  \item Each implemented algorithm was tested with $p \in \{2^0, 2^1, \ldots, 2^7\}$.
+  \item Each implemented algorithm was tested with $n \in \{2^{20}, 2^{21}, \ldots, 2^{29}\}$.
   \item The correctness of each algorithm has been tested with the sequential algorithm.
+%  \item Each running time only considers the computation from the beginning to the end of the starting function, we don't take in consideration the time to allocate the input or the output vector (but we consider all the temporary memory allocation useful for the computation). 
+\end{itemize}
   
+In the next subsections we will use $T_{seq}$ to indicate the completion time of the sequential algorithm and  $T_{par}(p)$ to indicate the completion time of a generic parallel algorithm with parallelism degree equals to $p$.
+
 \smallskip
 
 To replicate the experiments just run the benchmark with these parameters:
@@ -269,18 +300,82 @@ To replicate the experiments just run the benchmark with these parameters:
   \text{./benchmark --check --all --m-min 20 --m-max 29 --exp 5 --par-max 128}
 \end{equation*}
 
-\end{itemize}
-
 \subsection{benchmark results}
 
-% absolute speedup Sa(p) = Tseq / Tp
-% relative speedup Sr(p) = T1 / Tp
-% efficiency e(p) = T1 / ( p * Tp )
+\subsubsection{Running time}
+
+As first benchmark we simple compare the completion time of each algorithm with each parallelism degree $p$, using highest size available: $n = 2^{29}$.
+
+\smallskip
+
+\begin{table}[h]
+\begin{center}
+      \begin{tabular}{|l|l|r|r|r|r|r|r|r|r|}
+      \cline{3-10} 
+      \multicolumn{2}{c|}{} & \multicolumn{8}{ c| }{$p$} \\ \hline
+      Alg.  & Ver.  & $2^{0}$     & $2^{1}$    & $2^{2}$    & $2^{3}$    & $2^{4}$   & $2^{5}$  & $2^{6}$  & $2^{7}$ \\ \hline
+      \hline
+      seq   & stl  & 1\phantom{.}565  & -    & -    & -    & -    & -   & -   & -   \\ \hline
+      \hline
+      block & cilk & 1\phantom{.}560  & 1\phantom{.}178 & 623  & 541  & 483  & 343 & 286 & 226 \\ \hline
+      block & ff   & 1\phantom{.}670  & 1\phantom{.}245 & 711  & 399  & 252  & 190 & 201 & 232 \\ \hline
+      block & omp  & 1\phantom{.}555  & 1\phantom{.}169 & 601  & 330  & 179  & 121 & 117 & 117 \\ \hline
+      block & stl  & 1\phantom{.}571  & 1\phantom{.}176 & 609  & 322  & 181  & 124 & 119 & 119 \\ \hline
+      \hline
+      circ  & cilk & 10\phantom{.}631 & 5\phantom{.}515 & 2\phantom{.}834 & 1\phantom{.}717 & 1\phantom{.}326 & 845 & 617 & 588 \\ \hline
+      circ  & ff   & 10\phantom{.}416 & 5\phantom{.}718 & 3\phantom{.}058 & 1\phantom{.}677 & 979  & 644 & 574 & 613 \\ \hline
+      circ  & omp  & 10\phantom{.}340 & 5\phantom{.}362 & 2\phantom{.}887 & 1\phantom{.}514 & 891  & 576 & 513 & 486 \\ \hline
+      circ  & stl  & 10\phantom{.}323 & 5\phantom{.}415 & 2\phantom{.}810 & 1\phantom{.}553 & 951  & 661 & 594 & 723 \\ \hline
+      \end{tabular}
+\end{center}
+\end{table}
+
+\smallskip
+
+What we can see from the first raw data is that, as expected, for $p = 1$ and $p = 2$ the block-based algorithm is similar to the sequential algorithm while, on the other hand, the circuit-based algorithm performe worst than expected but scale very well increasing the parallelism degree.
+
+\subsubsection{Speedup}
+
+The speedup is calculated as: $s(p) = T_{seq} / T_{par}(p)$
+
+\begin{center}
+\begin{minipage}{0.9\linewidth}
+\includegraphics[width=\linewidth]{img/speedup}
+\captionof{figure}{Block-based algorithm graphic representation} 
+\end{minipage}
+\end{center}
+
+From the plot we see,, bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla
+
+\subsubsection{Scalability}
+
+The scalability is calculated as: $s(p) = T_{par}(1) / T_{par}(p)$
+
+\begin{center}
+\begin{minipage}{0.9\linewidth}
+\includegraphics[width=\linewidth]{img/scalability}
+\captionof{figure}{Block-based algorithm graphic representation} 
+\end{minipage}
+\end{center}
+
+From the plot we see,  bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla
+
+\subsubsection{Efficiency}
+
+The efficiency is calculated as: $\epsilon(p) = T_{seq} / (p \times T_{par}(p) )$
+
+\begin{center}
+\begin{minipage}{0.9\linewidth}
+\includegraphics[width=\linewidth]{img/efficiency}
+\captionof{figure}{Block-based algorithm graphic representation} 
+\end{minipage}
+\end{center}
+
+From the plot we see,  bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
 
-TODO
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \end{document}
