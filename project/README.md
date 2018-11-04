@@ -1,4 +1,4 @@
-To compile the project just run the script compile.sh
+To compile the project just run the script `compile.sh`, the binary is saved in `./bin/benchmark`
 
 Requirements:
 - C++17 support
