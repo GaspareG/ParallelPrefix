@@ -91,7 +91,6 @@ namespace spm
 
         // In the first task we need also to copy all the value from input to output
         // Then in second and third phase we can work in place
-        #pragma cilk grainsize = 1
         cilk_for(int k = 1; k <= spm::circuit::k1(1, m); k++)
         {
           auto [l, r] = spm::circuit::g1(1, k);
@@ -106,7 +105,6 @@ namespace spm
 
         for (int t = 2; t <= m; t++)
         {
-          #pragma cilk grainsize = 1
           cilk_for(int k = 1; k <= spm::circuit::k1(t, m); k++)
           {
             auto [l, r] = spm::circuit::g1(t, k);
@@ -121,7 +119,6 @@ namespace spm
 
         for (int t = 1; t < m; t++)
         {
-          #pragma cilk grainsize = 1
           cilk_for(int k = 1; k <= spm::circuit::k2(t); k++)
           {
             auto [l, r] = spm::circuit::g2(t, k, m);
